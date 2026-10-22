@@ -62,3 +62,6 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 ## Desinstalar
 Cada mudança fica no registro (`$KIT_REGISTRO`) com o desfazer. Se usou o atalho: `bash instalar.sh --desinstalar`
 para os serviços e restaura os arquivos `*.antes-kit` que o instalador guardou.
+
+## Licença
+MIT (ver `LICENSE`).
