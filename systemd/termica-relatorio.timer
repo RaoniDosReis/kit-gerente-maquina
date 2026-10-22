@@ -1,0 +1,10 @@
+# OPCIONAL e desligado por padrão: ajuste a data (uns 4 semanas depois do início do controle térmico) e ligue com
+#   systemctl --user enable --now termica-relatorio.timer
+# Persistent: se a máquina estiver desligada, roda ao ligar.
+[Unit]
+Description=Tendência térmica da CI: relatório em data a configurar
+[Timer]
+OnCalendar=2030-01-01 09:00:00
+Persistent=true
+[Install]
+WantedBy=timers.target

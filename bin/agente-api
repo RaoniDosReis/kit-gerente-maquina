@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Agente extra pago pela API da Anthropic (opcional): o orquestrador segue na assinatura e lança, além dos agentes
+# da cota e até o limite que consegue gerir, trabalhadores `claude -p` pagos pela API. A chave e o workspace (com
+# limite de gasto no Console) ficam em ~/.config/anthropic-api/{chave,workspace} (600), nunca no kit nem em conversa.
+# A chave entra só pelo apiKeyHelper do --settings deste agente: não vai para o ambiente, nem para a sessão do
+# orquestrador. Mesmas regras dos agentes da cota: aviso aos KIT_AGENTE_AVISO_K pelo hook agente-api-teto.sh
+# (passagem em $KIT_CACHE/<projeto>/passagem-agentes/<nome>.md e fim com PARCIAL; o orquestrador continua com
+# <nome>b e a passagem) e compactação em KIT_AGENTE_COMPACT como rede. Roda só em worktree: na pasta principal do
+# projeto o hook da passagem de bastão confundiria o agente com a sessão do orquestrador.
+# Uso:  agente-api [--papel codificador] [--modelo opus] [--projeto NOME] <nome> <worktree> <briefing.md>
+#       (rode em 2º plano; ao fim imprime o resultado, o custo e o gasto acumulado)
+#       agente-api --estado      (rodando, limite e gasto acumulado)
+# Limite de agentes simultâneos: $KIT_CACHE/api-limite (padrão KIT_API_LIMITE; o gerente ajusta com o dono).
+set -uo pipefail
+umask 077  # registros e pids só do usuário
+. "$HOME/.claude/skills/gerente-da-maquina/lib/kit.sh"
+CFG="$HOME/.config/anthropic-api"; DIR="$KIT_CACHE/api-agentes"
+LIMITE_ARQ="$KIT_CACHE/api-limite"; HOOK="$HOME/.claude/hooks/agente-api-teto.sh"
+mkdir -p "$DIR"
+for f in "$CFG/chave" "$CFG/workspace"; do  # a chave só legível pelo usuário
+  [ ! -e "$f" ] || [ "$(stat -c %a "$f")" = 600 ] || { echo "RECUSADO: $f precisa de modo 600 (chmod 600 $f)"; exit 2; }
+done
+limite() { local n; n=$(cat "$LIMITE_ARQ" 2>/dev/null); [[ "$n" =~ ^[0-9]+$ ]] && echo "$n" || echo "$KIT_API_LIMITE"; }
+vivos() { local n=0 f; for f in "$DIR"/*.pid; do [ -e "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && n=$((n+1)); done; echo "$n"; }
+gasto() {  # soma do total_cost_usd dos resultados (aproximado: o Console é a fonte oficial)
+  python3 -I - "$DIR" <<'PY'
+import glob, json, os, sys
+t = 0.0
+for f in glob.glob(os.path.join(sys.argv[1], "*.jsonl")):
+    for l in open(f, errors="replace"):
+        if '"type":"result"' in l:
+            try: t += json.loads(l).get("total_cost_usd") or 0
+            except ValueError: pass
+print(f"{t:.2f}")
+PY
+}
+
+if [ "${1:-}" = "--estado" ]; then
+  echo "agentes pela API: $(vivos) rodando, limite $(limite) · gasto registrado US\$ $(gasto)"
+  for f in "$DIR"/*.pid; do [ -e "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && echo "  - $(basename "$f" .pid)"; done
+  exit 0
+fi
+
+papel=""; modelo=""; projeto="$(kit_projetos | head -1 | tr '[:upper:]' '[:lower:]')"; projeto="${projeto:-projeto}"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --papel) papel="$2"; shift 2 ;;
+    --modelo) modelo="$2"; shift 2 ;;
+    --projeto) projeto="$2"; shift 2 ;;
+    *) break ;;
+  esac
+done
+[ $# -eq 3 ] || { grep -m1 -A2 "^# Uso:" "$0"; exit 2; }
+nome="$1"; wd="$(realpath -m "$2")"; briefing="$(realpath -m "$3")"
+[[ "$nome" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "nome inválido (use letras, números, . _ -)"; exit 2; }
+[ -d "$wd" ] || { echo "diretório não existe: $wd"; exit 2; }
+principais=("$HOME" "$(realpath -m "$KIT_GERENTE_DIR")")
+for n in $(kit_projetos); do principais+=("$(realpath -m "$(kit_proj_dir "$n")")"); done
+for p in "${principais[@]}"; do
+  [ "$wd" = "$p" ] && { echo "RECUSADO: rode num worktree, não na pasta principal ($wd)"; exit 2; }
+done
+[ -f "$briefing" ] || { echo "briefing não existe: $briefing"; exit 2; }
+[ -s "$CFG/chave" ] && [ -s "$CFG/workspace" ] || { echo "sem chave ou workspace em $CFG (falar com o gerente)"; exit 2; }
+[ -z "$modelo" ] && [ -z "$papel" ] && modelo=opus
+
+exec 9>"$DIR/.trava"; flock 9
+if [ "$(vivos)" -ge "$(limite)" ]; then
+  echo "RECUSADO: $(vivos) agente(s) da API rodando, limite $(limite). Espere um terminar."; exit 3
+fi
+[ -e "$DIR/$nome.pid" ] && kill -0 "$(cat "$DIR/$nome.pid")" 2>/dev/null && { echo "já existe um agente '$nome' rodando"; exit 2; }
+log="$DIR/$nome.jsonl"
+config="$(python3 -I - "$CFG/chave" "$HOOK" <<'PY'
+import json, shlex, sys
+print(json.dumps({
+    "apiKeyHelper": "cat " + shlex.quote(sys.argv[1]),
+    "hooks": {"PostToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": shlex.quote(sys.argv[2])}]}]},
+}))
+PY
+)"
+args=(-p --permission-mode auto --output-format stream-json --verbose --settings "$config")
+[ -n "$papel" ] && args+=(--agent "$papel")
+[ -n "$modelo" ] && args+=(--model "$modelo")
+(
+  cd "$wd" || exit 1
+  export ANTHROPIC_CUSTOM_HEADERS="anthropic-workspace-id: $(cat "$CFG/workspace")"
+  export CLAUDE_CODE_AUTO_COMPACT_WINDOW=$KIT_AGENTE_COMPACT AGENTE_API_NOME="$nome" AGENTE_API_PROJETO="$projeto"
+  unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN
+  exec claude "${args[@]}" < "$briefing"
+) > "$log" 2>&1 9>&- &
+pid=$!
+echo "$pid" > "$DIR/$nome.pid"
+flock -u 9; exec 9>&-
+echo "agente-api '$nome' (${papel:-sem papel}, ${modelo:-modelo do papel}) iniciado: PID $pid · log $log"
+wait "$pid"; rc=$?
+rm -f "$DIR/$nome.pid"
+python3 -I - "$log" "$rc" <<'PY'
+import json, sys
+log, rc = sys.argv[1], sys.argv[2]
+r = None; fonte = None
+for l in open(log, errors="replace"):
+    if '"subtype":"init"' in l:
+        try: fonte = json.loads(l).get("apiKeySource")
+        except ValueError: pass
+    if '"type":"result"' in l:
+        try: r = json.loads(l)
+        except ValueError: pass
+if fonte and fonte == "none":
+    print("ATENÇÃO: o agente não usou a chave da API (apiKeySource=none)")
+if not r:
+    print(f"agente-api terminou sem resultado (código {rc}); veja o fim de {log}")
+else:
+    print(f"agente-api terminou: {r.get('subtype')} · erro={r.get('is_error')} · chave={fonte} · custo US$ {r.get('total_cost_usd') or 0:.2f} · {r.get('num_turns')} turnos")
+    print(r.get("result") or "")
+PY
+echo "gasto acumulado da API: US\$ $(gasto)"

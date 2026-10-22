@@ -1,0 +1,57 @@
+# Configuração do kit do gerente da máquina. Copie para ~/.config/gerente-maquina/kit.conf e ajuste.
+# Formato KEY=VALUE (lido pelo bash e pelo python). Linhas com # são comentários.
+
+# Quem decide (aparece nas mensagens das sessões) e a sessão gerente.
+KIT_DONO="o dono"
+KIT_GERENTE=Gerente            # nome da sessão no Remote Control e nas mensagens entre sessões
+KIT_GERENTE_TMUX=gerente       # sessão tmux onde o gerente roda
+KIT_GERENTE_DIR=$HOME          # pasta onde o gerente é aberto (a pasta pessoal)
+
+# Projetos com orquestrador: nome:pasta[:sessão-tmux], separados por espaço. O 1º tem prioridade no bastão.
+KIT_PROJETOS="APP:$HOME/projetos/app"
+
+# Onde ficam estado, logs, orientação e o registro de mudanças.
+KIT_CACHE=$HOME/.cache/gerente-maquina
+KIT_MODO=auto                  # modo de permissão das sessões que o kit abre
+
+# Consumo da conta (plano por assinatura): meta da semana (%), agentes capazes simultâneos (opus/fable) e rodízio.
+KIT_META_SEMANA=95
+KIT_ORCAMENTO_MAX=3
+KIT_BASTAO_PROPORCAO=2
+
+# Máquina: agentes simultâneos com folga e com carga alta (load average acima de KIT_CARGA_ALTA).
+KIT_TETO_AGENTES=5
+KIT_TETO_AGENTES_CARGA=3
+KIT_CARGA_ALTA=24
+
+# Térmica da CI local (desligue com 0 se a CI não roda na máquina).
+KIT_TERM_ATIVA=1
+KIT_CI_PADRAO=Runner.Worker    # processo que indica job de CI rodando (GitHub Actions self-hosted)
+KIT_TERM_TETO_INICIAL=60       # % de desempenho máximo da CPU ao entrar na CI
+KIT_TERM_SOBE_C=70             # sobe 10% com a máxima <= este valor por 3 min
+KIT_TERM_DESCE_C=80            # desce 10% com a média acima deste valor
+KIT_TERM_CRITICO_C=90          # acima: volta direto ao teto inicial
+KIT_TERM_CALOR_C=80            # fora da CI, acima disso por 30 s o controle entra do mesmo jeito
+KIT_FAN_BOOST=""               # glob dos controles de ventoinha (ex.: /sys/class/hwmon/hwmon*/fan*_boost); vazio = não mexe
+
+# Passagem de bastão das sessões (tokens de contexto).
+KIT_PASSAGEM_AVISO_K=200000
+KIT_PASSAGEM_CAUTION_K=250000
+KIT_PASSAGEM_WARNING_K=275000
+KIT_PASSAGEM_CLEAR_K=300000
+KIT_PASSAGEM_TETO_K=330000
+KIT_COMPACT_REDE=360000
+
+# Agentes: aviso de teto e compactação.
+KIT_AGENTE_AVISO_K=150000
+KIT_AGENTE_COMPACT=200000
+
+# Agentes extras pagos pela API (opcional): limite simultâneo. Chave e workspace ficam em ~/.config/anthropic-api/.
+KIT_API_LIMITE=2
+
+# Opcionais.
+KIT_TERM_WINDOWS=0             # WSL: limita a CPU pelo powercfg.exe do Windows durante a CI
+KIT_CI_REPO=                   # dono/repositorio: tabela de jobs no relatório térmico
+KIT_CI_CGROUP=                 # cgroup dos executores da CI (vazio = não mede)
+KIT_PARADOS_MATA_OCIOSO=       # projetos cujos processos ociosos há 2 h fora de repositório podem morrer (padrão: o 1º)
+KIT_PARADOS_EXCECOES=          # regex de processos que o parados-auto nunca mata

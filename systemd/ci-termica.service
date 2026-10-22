@@ -1,0 +1,20 @@
+# Perfil térmico da CI: enquanto houver job de CI na máquina (processo que casa KIT_CI_PADRAO), aplica o perfil da CI
+# (performance, turbo, teto inicial, ventoinhas no máximo, teto dinâmico pela temperatura); 3 min depois do último job,
+# repõe o estado de antes. Ver skills/controle-termico/SKILL.md. No WSL só limita a CPU com KIT_TERM_WINDOWS=1.
+# Ligar: systemctl --user enable --now ci-termica   (parar no meio da CI repõe o estado de antes)
+# Log: $KIT_CACHE/ci-termica/ci-termica.log ou journalctl --user -u ci-termica
+[Unit]
+Description=Perfil térmico da CI (entra com job, volta ao estado de antes sem job)
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash %h/.claude/skills/controle-termico/scripts/ci-termica.sh
+Restart=on-failure
+RestartSec=30
+# SIGTERM só no processo principal, que repõe o estado; os filhos terminam o que fazem.
+KillMode=mixed
+TimeoutStopSec=60
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,18 @@
+{
+  "statusLine": {"type": "command", "command": "python3 ~/.claude/statusline.py", "padding": 0, "refreshInterval": 15},
+  "hooks": {
+    "SessionStart": [
+      {"hooks": [{"type": "command", "command": "bash ~/.claude/skills/monitor-de-uso/scripts/garantir-monitor.sh"}]}
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bash ~/.claude/skills/monitor-de-uso/scripts/vez-opus.sh *)",
+      "Bash(bash ~/.claude/skills/monitor-de-uso/scripts/esperar-*.sh *)",
+      "Bash(python3 ~/.claude/skills/monitor-de-uso/scripts/consumo-auto.py --ver)",
+      "Bash(python3 ~/.claude/skills/monitor-de-uso/scripts/balanco.py *)",
+      "Bash(python3 ~/.claude/skills/monitor-de-uso/scripts/uso-previsao.py *)",
+      "Bash(agente-api --estado)"
+    ]
+  }
+}

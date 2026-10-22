@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Passagem de bastão: chamado em segundo plano pelo hook compactar-na-fronteira.sh quando a sessão
+# encerra o turno com a passagem pronta (~/.claude/passagem/<NOME>.md). Espera o pane ficar ocioso e com a caixa de
+# digitação vazia (texto cinza de sugestão automática não conta), digita /clear e manda a mensagem de retomada; o
+# passagem-inicio.sh (SessionStart) injeta as orientações obrigatórias e a passagem. Desiste depois de 10 min sem
+# fronteira e libera o hook para tentar no próximo fim de turno.
+# Uso: limpar-sessao <socket do tmux> <pane> <NOME> <session_id> [pronta|forcado]. Teste: limpar-sessao --autoteste
+set -u
+KIT_LIB="${KIT_LIB:-$HOME/.claude/skills/gerente-da-maquina/lib}"
+[ -f "$KIT_LIB/kit.sh" ] && . "$KIT_LIB/kit.sh"
+EST="${COMPACTAR_ESTADO:-${KIT_CACHE:-$HOME/.cache/gerente-maquina}/compactar}"
+
+ocioso() {  # texto do pane com cores -> 0 se ocioso e com a caixa vazia
+  python3 -I -c '
+import re, sys
+bruto = sys.stdin.read().splitlines()
+limpo = [re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", l) for l in bruto]
+fim = "\n".join(limpo[-25:])
+if re.search(r"…\s*\(\d+\s*[smh]|esc to interrupt", fim): sys.exit(1)
+for i in range(len(limpo) - 1, -1, -1):
+    if limpo[i].lstrip().startswith("❯"):
+        resto = limpo[i].split("❯", 1)[1].replace("\xa0", " ").strip()
+        if not resto: sys.exit(0)
+        # sugestão automática: o texto vem em cinza/esmaecido logo depois do prompt
+        cru = bruto[i].split("❯", 1)[1]
+        sys.exit(0 if re.match(r"(\s|\xa0|\x1b\[[0-9;]*m)*\x1b\[(2|90|38;5;(23[6-9]|24\d|8))m", cru) else 1)
+sys.exit(1)'
+}
+
+if [ "${1:-}" = --autoteste ]; then
+  falhas=0; E=$'\e'
+  t() { printf '%s' "$2" | ocioso; r=$?; [ "$r" = "$3" ] || { echo "FALHA $1: $r, esperado $3"; falhas=1; }; }
+  t "caixa vazia" $'texto\n'"${E}[39m❯"$'\xc2\xa0\n─────\n  auto mode on' 0
+  t "ocupada" $'✽ Choreographing… (7s · ↓ 326 tokens)\n'"❯ "$'\n' 1
+  t "rascunho do dono" $'x\n'"${E}[39m❯ ${E}[39mmeu texto"$'\n' 1
+  t "sugestão em cinza" $'x\n'"${E}[39m❯ ${E}[2mok, me avisa"$'\n' 0
+  t "sem prompt" $'nada aqui\n' 1
+  [ "$falhas" = 0 ] && echo "autoteste: OK" || echo "autoteste: FALHOU"
+  exit "$falhas"
+fi
+
+[ $# -ge 4 ] || { echo "uso: $0 <socket> <pane> <NOME> <session_id> [pronta|forcado]" >&2; exit 2; }
+sock="$1"; pane="$2"; nome="$3"; sid="$4"; modo="${5:-pronta}"; TM="tmux -S $sock"
+agora() { date -Iseconds; }
+sleep 5
+pronto=0
+for _ in $(seq 120); do
+  if $TM capture-pane -e -p -t "$pane" 2>/dev/null | ocioso; then pronto=1; break; fi
+  sleep 5
+done
+if [ "$pronto" != 1 ]; then
+  echo "$(agora) $nome: 10 min sem fronteira (ocupada ou com rascunho na caixa); fica para o próximo fim de turno"
+  rm -f "$EST/$sid.limpando"; exit 1
+fi
+$TM send-keys -t "$pane" -l "/clear" && sleep 1 && $TM send-keys -t "$pane" Enter
+sleep 10
+if [ "$modo" = forcado ]; then
+  msg="Contexto limpo À FORÇA (marco do /clear, sem agente trabalhando) pela passagem de bastão automática: a passagem pode estar velha ou faltar. Cumpra"
+else
+  msg="Contexto limpo pela passagem de bastão automática, com a passagem pronta. Cumpra"
+fi
+msg="$msg as orientações obrigatórias de início injetadas pelo hook: leia a passagem e a lista obrigatória, confira com gh pr list e git worktree list, rearme os vigias e os agendamentos e siga pelos próximos passos. Se a passagem listar agentes ainda trabalhando, eles entregam o resultado aqui ao terminar: espere por eles e não os relance."
+$TM send-keys -t "$pane" -l "$msg" && sleep 1 && $TM send-keys -t "$pane" Enter
+echo "$(agora) $nome: /clear ($modo) aplicado em $pane e mensagem de retomada enviada"

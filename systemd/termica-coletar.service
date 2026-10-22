@@ -1,0 +1,6 @@
+# Coleta diária da tendência térmica da CI: acrescenta sessões e jobs em $KIT_CACHE/ci-termica/tendencia-*.csv
+[Unit]
+Description=Tendência térmica da CI: coleta diária
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I %h/.claude/skills/controle-termico/scripts/termica-tendencia.py --coletar

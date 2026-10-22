@@ -1,0 +1,15 @@
+# Processos parados: mata sozinho os parados inequívocos dos agentes do Claude Code e escala o resto ao zelador.
+# Política: docstring de parados-auto.py. Ligar: systemctl --user enable --now parados-auto
+# Log: $KIT_CACHE/parados-auto.log (mortes também em $KIT_REGISTRO). Provar: parados-auto.py --autoteste (ou --seco)
+[Unit]
+Description=Processos parados dos agentes do Claude Code (mata o inequívoco, escala o resto)
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -I %h/.claude/skills/monitor-de-uso/scripts/parados-auto.py
+Restart=always
+RestartSec=30
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

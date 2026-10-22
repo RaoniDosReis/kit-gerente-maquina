@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Guarda local: recusa push direto para a principal. Tudo entra por pull request.
+# Ligado pelo hook de início de sessão (git config core.hooksPath .githooks).
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/master)
+      echo "push direto para a principal recusado. Abra um pull request." >&2; exit 1 ;;
+  esac
+done
+exit 0

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.claude/.credentials.json)",
+      "Bash(cat ~/.claude/.credentials.json)",
+      "Bash(cat ~/.config/anthropic-api/*)",
+      "Bash(cat ~/.ssh/*)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.netrc)",
+      "Read(~/.aws/**)",
+      "Read(**/.env.*)",
+      "Read(**/.env)",
+      "Read(~/.config/anthropic-api/**)",
+      "Bash(sudo *)",
+      "Bash(git push * main)",
+      "Bash(git push * main*)",
+      "Bash(git push origin HEAD:main*)",
+      "Bash(git stash*)",
+      "Bash(pkill -f *)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "360000"
+  }
+}

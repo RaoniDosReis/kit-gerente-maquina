@@ -1,0 +1,7 @@
+# Relatório da tendência térmica da CI (opcional): coleta, gera relatorios/termica-<data>.txt e escala ao zelador
+# ("RELATÓRIO TÉRMICO" em saude-escalados.log), que avisa o gerente.
+[Unit]
+Description=Tendência térmica da CI: relatório
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I %h/.claude/skills/controle-termico/scripts/termica-tendencia.py --coletar --relatorio

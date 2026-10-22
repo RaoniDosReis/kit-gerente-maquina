@@ -1,0 +1,7 @@
+[Unit]
+Description=Tendência térmica da CI: coleta diária às 23h50
+[Timer]
+OnCalendar=*-*-* 23:50:00
+Persistent=true
+[Install]
+WantedBy=timers.target

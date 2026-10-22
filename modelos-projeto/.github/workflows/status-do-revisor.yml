@@ -1,0 +1,32 @@
+name: Status do revisor
+# A cada revisão submetida num PR, lê a linha "Veredito:" do parecer do revisor independente e grava o
+# status "revisor-independente" no commit revisado: verde para SEM OBJEÇÕES ou NÃO BLOQUEANTES,
+# vermelho para BLOQUEANTE. Revisão sem veredito não grava nada. Torne esse status obrigatório na regra
+# de proteção da principal (Settings > Rules). Sem o status verde no head, o merge não sai.
+on:
+  pull_request_review:
+    types: [submitted, edited]
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Gravar o status a partir do veredito
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEW_SHA: ${{ github.event.review.commit_id }}
+          REVIEW_URL: ${{ github.event.review.html_url }}
+        run: |
+          linha="$(printf '%s\n' "$REVIEW_BODY" | grep -m1 -E '^Veredito:' || true)"
+          [ -n "$linha" ] || { echo "sem veredito; nada a gravar"; exit 0; }
+          case "$linha" in
+            *BLOQUEANTE*) [[ "$linha" == *"NÃO BLOQUEANTES"* ]] && estado=success || estado=failure ;;
+            *"SEM OBJEÇÕES"*) estado=success ;;
+            *) echo "veredito não reconhecido: $linha"; exit 0 ;;
+          esac
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$REVIEW_SHA" -f state="$estado" \
+            -f context=revisor-independente -f description="$linha" -f target_url="$REVIEW_URL"

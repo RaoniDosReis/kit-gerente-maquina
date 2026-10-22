@@ -1,0 +1,17 @@
+# Saúde da máquina: coletor, ci-termica, ventoinhas na CI, limpeza de disco (docker builder prune por faixas, uv cache
+# prune no crítico, só se existirem) e escalação do que não resolve ao agente zelador (sonnet, gerido pelo gerente).
+# Ligar/desligar: systemctl --user enable --now | disable --now saude-auto
+# Log: $KIT_CACHE/saude-auto.log (ações também em $KIT_REGISTRO). Provar: saude-auto.py --autoteste
+# Desligar só a limpeza: drop-in com Environment=SAUDE_AUTO_PRUNE=0
+[Unit]
+Description=Saúde da máquina: faz a manutenção sozinha e escala só o que não resolve
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -I %h/.claude/skills/monitor-de-uso/scripts/saude-auto.py
+Restart=always
+RestartSec=30
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

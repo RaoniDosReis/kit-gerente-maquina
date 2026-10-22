@@ -1,0 +1,17 @@
+# Consumo central: mede o consumo da semana por projeto e os agentes rodando, mantém o bastão do modelo capaz
+# (solta e renova sozinho) e publica uma orientação única para os projetos ($KIT_CACHE/orientacao.{json,txt};
+# vigia dos orquestradores: esperar-orientacao.sh <projeto>). Escala ao zelador só o excepcional.
+# Ligar/desligar: systemctl --user enable --now | disable --now consumo-auto
+# Ver: python3 ~/.claude/skills/monitor-de-uso/scripts/consumo-auto.py --ver
+[Unit]
+Description=Consumo central da conta: orientação única para os projetos e bastão do modelo capaz
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -I %h/.claude/skills/monitor-de-uso/scripts/consumo-auto.py
+Restart=always
+RestartSec=30
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target
