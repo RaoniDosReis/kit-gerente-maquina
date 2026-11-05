@@ -18,8 +18,8 @@ if [ -d "$cache/passagem-agentes" ] && ls "$cache"/passagem-agentes/*.md >/dev/n
   echo "Passagens de agentes pendentes (continue com agente novo e apague ao fim):"
   ls -1 "$cache"/passagem-agentes/*.md | sed 's/^/- /'
 fi
-if [ -d "$cache/aprendizados-pendentes" ] && ls "$cache"/aprendizados-pendentes/*.md >/dev/null 2>&1; then
-  echo "Lições pendentes para o documentador: $(ls -1 "$cache"/aprendizados-pendentes/*.md | wc -l) arquivo(s) em $cache/aprendizados-pendentes/"
+if [ -d "$cache/licoes-pendentes" ] && ls "$cache"/licoes-pendentes/*.md >/dev/null 2>&1; then
+  echo "Lições pendentes para o documentador: $(ls -1 "$cache"/licoes-pendentes/*.md | wc -l) arquivo(s) em $cache/licoes-pendentes/"
 fi
 n=$(git -C "$proj" worktree list 2>/dev/null | wc -l)
 [ "$n" -gt 1 ] && echo "Worktrees ativos: $((n - 1)) (git worktree list). Confira se algum é de agente morto."

@@ -36,4 +36,20 @@ Só PRs que mexem em superfície de ataque (o orquestrador decide pelos caminhos
 Por lote ou PR: escopo, modelo de ameaças resumido, tabela de achados (id `SEG-<lote>-<n>`, gravidade, CWE, arquivo:linha, cenário, reprodução, correção sugerida), checklist conferido, ferramentas e versões, o que ficou de fora e por quê. Grave em `~/.cache/gerente-maquina/<projeto>/seguranca/` e mande o resumo ao orquestrador.
 
 ## 6. Aprendizados
-Leia `aprendizados/` antes de começar. Sem escrita no repositório: grave a lição em `~/.cache/gerente-maquina/<projeto>/aprendizados-pendentes/auditor-seg-<PR>.md`, no padrão da skill `orquestrador-de-agentes` §9. Só método: a frase sobre o estado atual do código é detalhe de achado aberto e fica no relatório local.
+Regras de método, para qualquer projeto. Lição nova: só o método genérico entra aqui (no padrão da skill `orquestrador-de-agentes` §9); a frase sobre o estado atual do código é detalhe de achado aberto e fica no relatório local. Sem escrita no repositório: grave-a em `~/.cache/gerente-maquina/<projeto>/licoes-pendentes/auditor-seg-<PR>.md`.
+- **Autorização por objeto:** a conferência mora na rota, não no modelo; toda rota que aceita o mesmo modelo de corpo precisa da mesma conferência (procure cada uso com grep).
+- **Dono do objeto:** chave estrangeira simples não prova que o objeto referenciado é do mesmo dono; procure FK que deveria ser composta e junções que não repetem a condição do dono.
+- **Entrada hostil:** além do teto de bytes, teste aninhamento profundo (o erro de recursão pode não ser o de validação), operações quadráticas, regex com retrocesso, alias de YAML que expande e funções caras dentro de uma consulta; meça o tempo da recusa no teto.
+- **Restrição tardia:** restrição (formatos, drivers, acesso remoto) aplicada depois do primeiro `open` do arquivo não reduz a superfície; liste toda chamada que recebe o caminho.
+- **Fila de jobs:** some prazo x tentativas x réplicas para saber quanto um envio ocupa a fila; falha de conteúdo deve ser não repetível e o prazo, por tipo de job.
+- **Dado derivado de teste:** quando ativar exige teste, confira se editar o que foi testado invalida o resultado e se a entrega olha esse resultado.
+- **Segredo no caminho da URL:** confira todo salto de log (proxy, app, servidor estático) com um marcador no caminho.
+- **Limite de corpo:** no proxy e no app, rota a rota, inclusive na rota final de fallback.
+- **Datas extremas:** data válida no esquema pode ser gravada pelo banco e recusada pelo driver ao ler (500 persistente); exija limites inferior e superior.
+- **Erro de banco no log:** erro não tratado pode gravar os parâmetros da consulta; esconda os parâmetros e prove com um marcador.
+- **Troca de senha:** o aviso precisa chegar a quem não fez a troca e não se consumir na primeira entrada; entrada em voo com a senha antiga não pode criar sessão depois da revogação.
+- **Corrida provada sem tempo:** pare um lado por evento (não por `sleep`), atrase só a vítima e prove também contra a principal para ver a prova discriminar.
+- **Verificação em shell:** `curl | grep -q` com `pipefail` engana (SIGPIPE); guarde a saída e confira o status antes do grep; confira o caminho original (`lstat`) e o resolvido; recuse caracteres de controle em texto alheio mostrado no terminal.
+- **Cabeçalhos e logs do proxy:** erros gerados pelo próprio proxy (502, 413) podem não levar o cabeçalho; prove o filtro de log com a imagem do projeto, destino fora do ar e marcadores no cabeçalho, cookie e query.
+- **Dependências e histórico:** "zero achados" só vale para os alvos que o scanner leu (compare com os lockfiles); gitleaks num `git clone --mirror` com `--log-opts=--all`; pacote suspeito se confere sem executar (soma contra o lock, código, idade, quem o puxa).
+- **Texto do modelo ou da entrada:** chega cru a terminal, relatório e arquivo; filtre escapes em toda saída.

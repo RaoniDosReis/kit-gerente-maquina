@@ -28,4 +28,4 @@ Só três coisas: a URL do ambiente, uma credencial de teste do papel que a etap
 - Demonstração ao dono no fim de uma fatia: o ambiente fica no ar até o "pode seguir"; o aviso fora da sessão traz a URL e o que ele precisa fazer.
 
 ## Aprendizados
-Leia `aprendizados/indice.md` e registre no arquivo do assunto.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

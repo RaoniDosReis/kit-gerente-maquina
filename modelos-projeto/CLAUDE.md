@@ -1,6 +1,6 @@
 # <NOME DO PROJETO> — <uma linha do que é>
 
-> Modelo: preencha tudo que está entre `<...>` e apague esta nota. Mantenha este arquivo curto (alvo: menos de 3 mil tokens): ele entra em toda sessão de todo agente. Regra que só vale para um papel vai na skill do papel; truque técnico vai em `aprendizados/`.
+> Modelo: preencha tudo que está entre `<...>` e apague esta nota. Mantenha este arquivo curto (alvo: menos de 3 mil tokens): ele entra em toda sessão de todo agente. Regra que só vale para um papel vai na skill do papel; truque técnico genérico vai na seção Aprendizados da skill do papel; o que é só deste projeto, em `docs/processo/`.
 
 <Dois ou três parágrafos: para quem é, o que faz, em que fase está.>
 
@@ -15,7 +15,7 @@
 
 ## Lugares (preencha uma vez)
 - Repositório: `<dono>/<repo>`; principal: `main`. Clone principal: `<pasta>` (fica na principal; ninguém edita nele).
-- Nome do projeto no kit: `<NOME>` (igual ao de `KIT_PROJETOS`). Pasta de trabalho dos agentes: `~/.cache/gerente-maquina/<NOME>/` (`passagem-agentes/`, `aprendizados-pendentes/`, `seguranca/`, `auditoria-qualidade/`). Em todos os papéis, "pasta de trabalho" é esta.
+- Nome do projeto no kit: `<NOME>` (igual ao de `KIT_PROJETOS`). Pasta de trabalho dos agentes: `~/.cache/gerente-maquina/<NOME>/` (`passagem-agentes/`, `licoes-pendentes/`, `seguranca/`, `auditoria-qualidade/`). Em todos os papéis, "pasta de trabalho" é esta.
 - Worktrees: `~/worktrees/<etapa ou PR>-<papel>[-r<rodada>]`; ambientes: `~/.cache/gerente-maquina/<NOME>/venvs/<mesmo nome>`.
 - Vagas (ambiente local por agente): `docs/processo/ambiente-local.md`.
 
@@ -47,10 +47,10 @@ Valem em todo briefing; o briefing só cita esta seção.
 - **Principal vermelha:** só entra o PR de conserto; ninguém mais mescla; agentes seguem com commit local, sem push. Após cada merge, o orquestrador vigia a CI do commit dele até o fim.
 
 ## Como registrar regras e aprendizados
-- **Um lugar só, o mais forte que couber:** verificação automática; este `CLAUDE.md`; a skill do papel; o briefing; `aprendizados/` da skill do papel; a memória do orquestrador. Método: skill global `orquestrador-de-agentes` §9.
+- **Um lugar só, o mais forte que couber:** verificação automática; este `CLAUDE.md`; a skill do papel; o briefing; a seção Aprendizados da skill do papel (só o genérico) ou `docs/processo/` (o específico do projeto); a memória do orquestrador. Método: skill global `orquestrador-de-agentes` §9.
 - **Antes de inserir,** `grep -rniE '<2-3 termos>' CLAUDE.md .claude/skills docs/processo`. Igual: não crie. Parecida: funda. Contraditória: reescreva a antiga em todos os lugares; regra nova nunca fica ao lado da velha.
 - **Regra:** até 3 linhas, `- **<assunto>:** <o que fazer>. <porquê>. (<quem decidiu>; substitui <regra antiga>)`.
-- **Aprendizado:** cada skill tem `aprendizados/` com `indice.md` e um arquivo por assunto; uma linha por lição: `- <regra no imperativo>: <sintoma> → <causa>. (<origem>)`. Papel sem escrita no repositório grava em `<pasta de trabalho>/aprendizados-pendentes/`, e o orquestrador manda ao documentador.
+- **Aprendizado:** se vale para qualquer projeto, regra curta (1 a 2 linhas, sem data nem história) na seção `## Aprendizados` no fim da SKILL.md do papel: `- **<assunto>:** <regra no imperativo>; <porquê>.`; se é só deste projeto, no documento do assunto em `docs/processo/`. Papel sem escrita no repositório grava em `<pasta de trabalho>/licoes-pendentes/`, e o orquestrador manda ao documentador.
 - **Decisão do dono:** vai à memória na hora e ao repositório no próximo PR do documentador.
 
 ## Amarrações do projeto (regras fixas que a ideia nova e a revisão conferem)

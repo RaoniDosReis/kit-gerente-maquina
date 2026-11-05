@@ -11,7 +11,7 @@ Você implementa uma etapa seguindo `docs/processo/ciclo-de-entrega.md`. Os docs
 O `CLAUDE.md` já vem carregado (as "Regras de operação de todo agente" valem inteiras); não o releia. Leia só o que a tarefa pede:
 1. O trecho da sua subetapa no briefing (`docs/processo/etapas/<etapa>.md`): o cabeçalho e a sua subetapa, não o Registro das outras.
 2. Todo requisito, decisão e contrato citados nesse trecho, inteiros.
-3. `aprendizados/indice.md` desta skill e só os arquivos que tocam a tarefa.
+3. A seção Aprendizados desta skill (fim do arquivo).
 
 ## Ambiente
 Worktree, ambiente de dependências e vaga próprios, com o nome do briefing (`CLAUDE.md`, "Lugares" e "Ambiente"). Confira a versão da linguagem antes de qualquer teste. Nunca compartilhe ambiente entre worktrees. Conflito de versão ou dependência que não instala: avise o orquestrador com a causa e o impacto antes de qualquer contorno.
@@ -48,4 +48,4 @@ Corrija o achado e só ele. Para cada conserto de entrada hostil, escreva o pior
 Responda ao orquestrador: branch e commits, número do PR, contagem de linhas de produção, requisitos entregues e parciais, resultado de cada grupo de verificação e o que ficou diferente do briefing, com o motivo.
 
 ## Aprendizados
-Leia `aprendizados/indice.md` e só o arquivo do assunto; registre a lição em uma linha no arquivo do assunto (assunto novo: arquivo novo e linha no índice).
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

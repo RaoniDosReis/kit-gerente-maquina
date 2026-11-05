@@ -10,7 +10,7 @@ deve fazer para montá-la do zero ou adaptá-la. Os scripts em `scripts/` são o
 leia, rode e adapte à máquina (outro sistema, outra conta, outros projetos). Os nomes de projetos e do gerente vêm sempre do
 `kit.conf` (`KIT_PROJETOS`, `KIT_GERENTE`); nunca escreva nomes no código.
 
-Antes de mexer nos scripts, leia `aprendizados/` (um arquivo por assunto).
+Antes de mexer nos scripts, leia a seção Aprendizados (fim do arquivo).
 
 ## 1. O que existe e por quê
 
@@ -137,7 +137,7 @@ Avisos do monitor em `alertas.log`: `USO ADEQUADO`, `USO ULTRAPASSANDO` (qual pe
 
 **Adaptar** a outro ambiente: troque a fonte da consulta de uso se o endereço mudar; ajuste os pesos de custo e os limiares de soltura do bastão ao ritmo do dono; se não houver `systemd`, rode o `consumo-auto.py` sob outro supervisor.
 
-**Regras de conduta**: o gerente pede, não obriga, os orquestradores; só interfere em integridade, segurança ou acima do nível deles. Antes de trocar um script em uso por vigia, veja `aprendizados/vigias-por-estado.md`.
+**Regras de conduta**: o gerente pede, não obriga, os orquestradores; só interfere em integridade, segurança ou acima do nível deles. Antes de trocar um script em uso por vigia, veja Aprendizados.
 
 ## 9. Agentes extras pela API (opcional)
 
@@ -153,3 +153,13 @@ Para ter mais agentes em paralelo além da cota da assinatura, o orquestrador la
 ## 10. Saúde da máquina e processos parados
 
 `saude-maquina.sh` amostra a cada 30 s e grava `$KIT_CACHE/saude.log`: carga, memória disponível, swap, pressão (PSI) de CPU/memória/disco, contêineres, jobs da CI (processos que casam `KIT_CI_PADRAO`), temperatura e frequência (`temperatura.sh`); sem docker, GPU ou cgroup a coluna fica `-`. O serviço `saude-auto` lê o log a cada 60 s e resolve sozinho: reinicia o coletor parado e o `ci-termica`; repõe as ventoinhas (`KIT_FAN_BOOST`) a 255 durante a CI; limpa disco por faixas (`docker builder prune` abaixo de 50 GB com 6 h, abaixo de 40 GB com 2 h e depois 1 h; `uv cache prune` abaixo de 15 GB; cada um só se o programa existir); grava o `teto-maquina` (`KIT_TETO_AGENTES`, ou `KIT_TETO_AGENTES_CARGA` se a carga de 1 min passou de `KIT_CARGA_ALTA` nos últimos 30 min). Só escala em `saude-escalados.log` o que não resolve: SESSÃO SEM AUTO, DOCKER FORA, TEMPERATURA CRÍTICA, MEMÓRIA BAIXA, PRESSÃO DE MEMÓRIA, CPU SATURADA, DISCO CRÍTICO, COLETOR PARADO, CI-TÉRMICA FORA, VENTOINHAS…, RELATÓRIO TÉRMICO. O serviço `parados-auto` examina a cada 5 min os processos descendentes do Claude Code: mata sozinho o inequívoco (cwd apagada, laço que casa a própria linha, ocioso há 2 h fora de repositório nos projetos de `KIT_PARADOS_MATA_OCIOSO`); protege vigias, `gh run watch`, testes em andamento, worktrees vivos e `KIT_PARADOS_EXCECOES`; o resto vai a `parados-escalados.log` como DECIDIR, INFORMAR ou FALHA. `esperar-zelador.sh` é o único vigia armado (pelo zelador); `esperar-saude.sh` e `esperar-processos-parados.sh` são ferramentas manuais que avisam só em mudança de estado. No WSL, ventoinhas, ci-termica e docker ausente são pulados sem escalar; disco e carga valem.
+
+## Aprendizados
+
+- **Sinal:** script que precisa agir no sinal (repor estado, soltar recurso) vai em Python; o trap do bash roda no meio da análise de um `$(...)` e pode corrompê-la.
+- **Trava (flock):** em bash o descritor da trava é herdado pelos filhos e um filho órfão a segura; feche-o no filho (`9>&-`) ou use Python.
+- **`systemd-run`** expande `$` no comando: use `--expand-environment=no`.
+- **polkit `allow_active`** vale num serviço `systemctl --user` enquanto há sessão gráfica (mesmo com a tela bloqueada); só com linger é recusado: avise e siga. Confira com `pkcheck` sem mudar nada.
+- **Prova de vigia:** prazos por variável em segundos (`*_S`, com precedência sobre `*_MIN`) e a medida física fixada por variável; nunca o relógio nem o disco reais.
+- **Script em uso por vigia:** grave a versão nova num temporário da mesma pasta e `mv -f` por cima (o bash lê o script aos poucos); nunca reescreva no lugar.
+- **Renovação da semana:** a hora informada pela conta oscila segundos entre consultas; arredonde e aceite diferença menor que 1 h.

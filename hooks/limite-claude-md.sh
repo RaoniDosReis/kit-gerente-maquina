@@ -27,5 +27,5 @@ case "$(basename -- "${f:-x}")" in CLAUDE.md|CLAUDE.local.md|SKILL.md) ;; *) exi
 [ -f "$f" ] || exit 0
 n=$(wc -l < "$f")
 [ "$n" -le "$LIMITE" ] && exit 0
-echo "Limite de linhas: $f tem $n linhas; o máximo é $LIMITE. Resuma agora: deixe nele só o que precisa ser carregado sempre e mova o detalhe para arquivos de apoio que não são carregados automaticamente (docs/, aprendizados/, arquivos de referência da skill), deixando no lugar uma linha curta que aponta onde está cada assunto." >&2
+echo "Limite de linhas: $f tem $n linhas; o máximo é $LIMITE. Resuma agora: deixe nele só o que precisa ser carregado sempre e mova o detalhe para arquivos de apoio que não são carregados automaticamente (docs/, arquivos de referência da skill), deixando no lugar uma linha curta que aponta onde está cada assunto." >&2
 exit 2

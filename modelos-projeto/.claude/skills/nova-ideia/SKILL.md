@@ -45,4 +45,4 @@ Na mesma passagem, sem deixar documento para depois: a pergunta respondida com o
 Não aplicar antes da decisão quando houver conflito ou custo grande. Não criar requisito sem origem. Não ampliar uma fatia já aprovada em silêncio: diga "entra na fatia X, já aprovada". Não reaproveitar estrutura de versões anteriores do sistema.
 
 ## Aprendizados
-Leia `aprendizados/indice.md` e registre no arquivo do assunto.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

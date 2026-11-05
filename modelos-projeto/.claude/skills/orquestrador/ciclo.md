@@ -13,4 +13,4 @@ Parte da skill `orquestrador`. O método geral está na skill global `orquestrad
 5. **Testador-usuário** nas etapas com interface (skill `ambiente-de-teste`); relatório em `docs/processo/testes-de-usuario/`.
 6. **Portão e merge:** `portoes.md`.
 7. **Próxima etapa** pela ordem do plano, dentro da dosagem. O dependente fica encadeado (correção → revisor → merge → próximo codificador).
-8. **Retrospectiva** (cinco perguntas da skill global §8) antes da próxima etapa. **Lições pendentes:** esvazie `<pasta de trabalho>/aprendizados-pendentes/`: mande os arquivos ao documentador no próximo PR de docs e apague cada um pelo caminho exato depois do merge.
+8. **Retrospectiva** (cinco perguntas da skill global §8) antes da próxima etapa. **Lições pendentes:** esvazie `<pasta de trabalho>/licoes-pendentes/`: mande os arquivos ao documentador no próximo PR de docs e apague cada um pelo caminho exato depois do merge.

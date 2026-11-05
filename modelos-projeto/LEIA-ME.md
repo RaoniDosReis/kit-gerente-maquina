@@ -5,7 +5,7 @@ Esta pasta é o que se copia para a pasta de um projeto novo para que a sessão 
 ## O que tem
 - `CLAUDE.md`: regras para todo agente, com lugares para preencher.
 - `.claude/agents/`: os 8 papéis (codificador, revisor, auditor de segurança, auditor de qualidade, documentador, mantenedor de branches, vigia da CI, testador-usuário), cada um com modelo, esforço, skill pré-carregada, ferramentas negadas e o aviso de 150 mil tokens com passagem PARCIAL.
-- `.claude/skills/`: a skill do orquestrador do projeto e as skills dos papéis, cada uma com `aprendizados/` vazio.
+- `.claude/skills/`: a skill do orquestrador do projeto e as skills dos papéis, cada uma com a seção Aprendizados no fim (só regras genéricas; o que é do projeto vai para `docs/processo/`).
 - `.claude/hooks/session-start.sh` e `.claude/settings.json`: guarda de push, resumo de pendências no início da sessão e compactação automática.
 - `.claude/rules/`: regras por caminho (um exemplo).
 - `docs/processo/`: ciclo de entrega, andamento em fragmentos, ambiente local, modelo de briefing, perguntas ao dono.

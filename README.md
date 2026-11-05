@@ -12,9 +12,9 @@ Um jeito organizado de trabalhar com o **Claude Code** numa estação de desenvo
 Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 
 ## Começar
-1. **Linux**: clone o kit e abra o Claude Code dentro da pasta:
+1. **Linux**: clone o kit (troque `<endereço-do-kit>` pelo endereço deste repositório ou do seu fork) e abra o Claude Code dentro da pasta:
    ```bash
-   git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
+   git clone <endereço-do-kit> ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
    ```
    **Windows**: siga primeiro `docs/windows-wsl.md`, porque o kit roda no WSL2.
 2. O Claude Code lê o `CLAUDE.md` do kit e conduz a montagem com você, peça por peça, pelo roteiro
@@ -38,7 +38,7 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 | `skills/monitor-de-uso/` | consumo da conta, orientação única, orçamento de agentes, bastão, saúde, processos parados, agentes pela API |
 | `skills/controle-termico/` | perfil da CI local: teto de desempenho que sobe e desce pela temperatura, ventoinhas, relatórios |
 | `skills/zelador/` | o agente que age nas escalações |
-| `skills/orquestrador-de-agentes/` | método do orquestrador: papéis, paralelismo, ciclo do PR, aprendizados |
+| `skills/orquestrador-de-agentes/` | método do orquestrador: papéis, paralelismo, ciclo do PR, registro de regras e aprendizados |
 | `skills/auditor-de-qualidade/`, `skills/auditor-de-seguranca/` | métodos dos auditores |
 | `hooks/` | início das sessões, passagem de bastão, teto dos agentes, limites de tamanho |
 | `bin/` | `limpar-sessao` e `agente-api` prontos; os lançadores (`gerente`, `sessao-projeto`...) vêm descritos no roteiro |
