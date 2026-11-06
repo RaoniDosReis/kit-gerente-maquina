@@ -27,6 +27,7 @@ Memória do orquestrador (índice e arquivos); skills globais (`~/.claude/skills
 6. **Processo:** gargalos e desperdícios que os registros mostram (rodadas evitáveis, rebases, filas, briefings repetidos), com ganho estimado.
 7. **Segurança operacional:** as regras do dono sobre segredos, limpeza, processos, git e máquina precisam sobreviver a qualquer resumo.
 8. **Padrão:** o que entrou desde a última auditoria seguiu a skill `orquestrador-de-agentes` §9 (lugar, modelo, tamanho, checagem de duplicata)?
+9. **Padrão de velocidade:** toda auditoria confere se o fluxo de `docs/processo/ciclo-de-entrega.md` (seção Velocidade) se mantém: rode `scripts/medir-velocidade.py <dono/repo> <início UTC>` na janela da auditoria e compare com a medição anterior guardada no relatório. Peça do padrão desfeita ou piora acima de 25% (CI de PR ou aberto→merge) é item do relatório, com a causa.
 
 ## 4. Melhoria contínua
 Não basta achar erro: proponha como trabalhar melhor, com dados dos registros (PRs, execuções da CI, relatórios de revisão, aprendizados, memória de estado):

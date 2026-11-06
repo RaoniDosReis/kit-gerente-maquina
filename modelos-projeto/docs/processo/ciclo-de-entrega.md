@@ -22,6 +22,14 @@ Modelo: ajuste os nomes. O dono atua como gestor da automação: o ciclo de cada
 5. Se há interface: o orquestrador sobe o ambiente de teste e aciona o testador-usuário com o manual. Erro volta ao passo 3; sugestões vão ao dono (desempenho e segurança o orquestrador aciona um codificador e avisa).
 6. Tudo verde, revisor sem bloqueio, testador sem erro: o orquestrador arma o merge (squash) e abre a próxima etapa. O andamento entra pelo fragmento do PR (`andamento.md`).
 
+## Velocidade (padrão de fluxo)
+Medido num projeto real: com o desenho abaixo, a CI de PR caiu de cerca de 37 para 20 min (outro projeto: 14 para 5), o tempo do PR aberto ao merge caiu à metade e as entregas de funcionalidade por dia subiram de 1 para 4. A auditoria de qualidade confere que ele se mantém (skill `auditor-de-qualidade` §3 item 9).
+- **PR rápido:** no PR, só o que pega erro do diff: lint, tipos e os testes dos módulos tocados, sem cobertura, sem o segundo navegador, sem bateria lenta; os testes de segurança continuam no PR.
+- **Bateria completa uma vez por dia** na principal (e a CI do push na principal como prova de integração); vermelho nela vira PR de conserto na hora.
+- **Sem "atualizado com a principal" obrigatório** na regra de proteção: o PR não roda a CI de novo só porque a principal andou.
+- **Lint antes do push** (hook `pre-push`: lint e tipos dos pacotes tocados), para não gastar uma CI com erro de formatação.
+- **Jobs pesados em executores reservados**, para não disputar a máquina com os rápidos.
+
 ## Entradas e saídas obrigatórias
 - Briefing: `etapas/<etapa>.md` (o contrato da etapa).
 - PR: título com o requisito/etapa; corpo pelo modelo; rastreabilidade pergunta → requisito → decisão.
