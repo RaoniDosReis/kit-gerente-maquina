@@ -16,3 +16,8 @@ O kit roda dentro do WSL2; o Windows só abre terminais e liga o WSL.
 - **Suspensão do notebook:** quem manda é o Windows; ajuste o plano de energia lá. O `systemd-inhibit` do WSL não impede o Windows de dormir.
 - **Hardware (`hardware.md`):** descreva o Windows e o notebook; o gerente não administra drivers.
 - Arquivos do projeto: mantenha-os no disco do Ubuntu (`~/projetos`), não em `/mnt/c` (lento e sem permissões Linux).
+
+## Windows nativo (Git Bash)
+Modo básico: hooks, skills, passagem de bastão e orquestração. Sem systemd, tmux, `/proc` e `/sys`: as automações, a
+térmica, os lançadores e o `/clear` automático ficam de fora; o zelador só no modo `agente`. `bash instalar.sh
+--verificar` lista o que fica de fora. Detalhe e tabela: `docs/windows-wsl.md`.

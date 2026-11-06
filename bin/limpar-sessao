@@ -7,7 +7,11 @@
 # Uso: limpar-sessao <socket do tmux> <pane> <NOME> <session_id> [pronta|forcado]. Teste: limpar-sessao --autoteste
 set -u
 KIT_LIB="${KIT_LIB:-$HOME/.claude/skills/gerente-da-maquina/lib}"
+[ -f "$KIT_LIB/kit.sh" ] || KIT_LIB="$(dirname "$(readlink -f "$0")")/../skills/gerente-da-maquina/lib"
+# shellcheck disable=SC1091
 [ -f "$KIT_LIB/kit.sh" ] && . "$KIT_LIB/kit.sh"
+# Sem tmux (Windows nativo) não há pane para digitar: o hook compactar-na-fronteira pede o /clear ao dono.
+if [ "${1:-}" = --autoteste ] && ! command -v tmux >/dev/null 2>&1; then echo "autoteste: OK (pulado: sem tmux, o /clear automático fica de fora)"; exit 0; fi
 EST="${COMPACTAR_ESTADO:-${KIT_CACHE:-$HOME/.cache/gerente-maquina}/compactar}"
 
 ocioso() {  # texto do pane com cores -> 0 se ocioso e com a caixa vazia

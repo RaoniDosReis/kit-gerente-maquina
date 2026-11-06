@@ -3,6 +3,14 @@
 #. Passou do limite: sai com 2 e o motivo vai ao Claude, que resume e aponta onde está o resto.
 # Teste: limite-claude-md.sh --autoteste
 set -u
+# Python: python3, python ou py -3 (Windows com Git Bash), pela detecção do kit.
+KIT_LIB="${KIT_LIB:-$HOME/.claude/skills/gerente-da-maquina/lib}"
+[ -f "$KIT_LIB/plataforma.sh" ] || KIT_LIB="$(dirname "$(readlink -f "$0")")/../skills/gerente-da-maquina/lib"
+# shellcheck disable=SC1091
+if [ -f "$KIT_LIB/plataforma.sh" ]; then
+  . "$KIT_LIB/plataforma.sh"; KIT_PY="$(kit_python || echo python3)"
+  if [ "$KIT_PY" != python3 ]; then python3() { command $KIT_PY "$@"; }; export KIT_PY; export -f python3; fi
+fi
 LIMITE="${LIMITE_CLAUDE_MD:-500}"
 
 if [ "${1:-}" = --autoteste ]; then

@@ -59,7 +59,8 @@ CFG = {
     "SYSTEMCTL": ENV.get("SAUDE_AUTO_SYSTEMCTL", "systemctl --user"),
     "GARANTIR": ENV.get("SAUDE_AUTO_GARANTIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "garantir-monitor.sh")),
     "CI_CMD": ENV.get("SAUDE_AUTO_CI_CMD", "pgrep " + shlex.quote(KC["KIT_CI_PADRAO"])),
-    "GPU_W_CMD": ENV.get("SAUDE_AUTO_GPU_W_CMD", "nvidia-smi --query-gpu=power.draw --format=csv,noheader,nounits"),
+    "GPU_W_CMD": ENV.get("SAUDE_AUTO_GPU_W_CMD", ""),  # vazio: pelo tipo de GPU (gpu_watts)
+    "DRM": ENV.get("KIT_DRM_DIR", "/sys/class/drm"),
     "PRUNE": ENV.get("SAUDE_AUTO_PRUNE", "1") != "0",
     "SESSOES": H(ENV.get("SAUDE_AUTO_SESSOES", "~/.claude/sessions")),
     "PROJETOS": H(ENV.get("SAUDE_AUTO_PROJETOS", "~/.claude/projects")),
@@ -81,6 +82,30 @@ def anexar(caminho, linha):
     os.makedirs(os.path.dirname(caminho), exist_ok=True)
     with open(caminho, "a") as f:
         f.write(linha + "\n")
+
+
+def gpu_watts():
+    """Potência da GPU em W, pelo tipo detectado (K.gpu(); KIT_GPU força). Sem GPU dedicada (nenhuma ou intel
+    integrada), 0: o calor é da CPU. Sem leitura de uma GPU que existe, None (não dá para dizer que é só da CI)."""
+    if CFG["GPU_W_CMD"]:
+        _, out = rodar(CFG["GPU_W_CMD"], timeout=20)
+    else:
+        tipo = K.gpu()
+        if tipo in ("nenhuma", "intel"):
+            return 0.0
+        if tipo == "amd":
+            ws = []
+            for f in glob.glob(os.path.join(CFG["DRM"], "card*", "device", "hwmon", "hwmon*", "power1_average")):
+                try:
+                    ws.append(int(open(f).read().strip()) / 1e6)
+                except (OSError, ValueError):
+                    pass
+            return sum(ws) if ws else None
+        _, out = rodar("nvidia-smi --query-gpu=power.draw --format=csv,noheader,nounits", timeout=20)
+    try:
+        return float(out.split()[0])
+    except (ValueError, IndexError):
+        return None
 
 
 def rodar(cmd, timeout=600):
@@ -294,11 +319,7 @@ class Zelo:
         elif ult:
             self.limpar("docker")
         if persistiu(3600, lambda x: (x.get("cpu_pacote_C") or 0) >= 96):
-            cod, out = rodar(CFG["GPU_W_CMD"], timeout=20)
-            try:
-                w = float(out.split()[0])
-            except (ValueError, IndexError):
-                w = None
+            w = gpu_watts()
             if w is not None and w < 30:
                 self.escalar("temp", f"TEMPERATURA CRÍTICA: CPU >= 96 °C há 60 min com a GPU em {w:.0f} W (calor só "
                                      f"da CI; o ci-termica não bastou)", 60)
@@ -502,6 +523,23 @@ def autoteste():
         prepara(cpu_pacote_C=97, gpu="110")
         volta()
         confere("temp crítica com GPU 110 W: não escala", ler("esc") == "", ler("esc"))
+        prepara(cpu_pacote_C=97, gpu="")
+        volta()
+        confere("temp crítica, GPU sem leitura: não escala", ler("esc") == "", ler("esc"))
+        env_gpu = dict(env)
+        env_gpu.update({"SAUDE_AUTO_GPU_W_CMD": "", "KIT_GPU": "nenhuma"})
+        prepara(cpu_pacote_C=97)
+        shutil.rmtree(os.path.join(T, "estado"), ignore_errors=True)
+        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "--uma-vez"], env=env_gpu, timeout=60)
+        confere("temp crítica sem GPU (KIT_GPU=nenhuma): escala", "TEMPERATURA CRÍTICA" in ler("esc"), ler("esc"))
+        drm = os.path.join(T, "drm", "card0", "device", "hwmon", "hwmon9")
+        os.makedirs(drm, exist_ok=True)
+        open(os.path.join(drm, "power1_average"), "w").write("120000000\n")
+        env_gpu.update({"KIT_GPU": "amd", "KIT_DRM_DIR": os.path.join(T, "drm")})
+        prepara(cpu_pacote_C=97)
+        shutil.rmtree(os.path.join(T, "estado"), ignore_errors=True)
+        subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "--uma-vez"], env=env_gpu, timeout=60)
+        confere("temp crítica com GPU AMD em 120 W: não escala", ler("esc") == "", ler("esc"))
         prepara(mem_disp_GB=2)
         volta()
         confere("memória baixa 30 min: escala", "MEMÓRIA BAIXA" in ler("esc"), ler("esc"))

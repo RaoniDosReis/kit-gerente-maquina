@@ -8,7 +8,10 @@
 # Uma mensagem por marco e por sessão. Variáveis: AGENTE_API_NOME, AGENTE_API_PROJETO.
 # Teste: --autoteste
 set -u
-[ -f "$HOME/.claude/skills/gerente-da-maquina/lib/kit.sh" ] && . "$HOME/.claude/skills/gerente-da-maquina/lib/kit.sh"
+KIT_LIB="${KIT_LIB:-$HOME/.claude/skills/gerente-da-maquina/lib}"
+[ -f "$KIT_LIB/kit.sh" ] || KIT_LIB="$(dirname "$(readlink -f "$0")")/../skills/gerente-da-maquina/lib"
+# shellcheck disable=SC1091
+[ -f "$KIT_LIB/kit.sh" ] && . "$KIT_LIB/kit.sh"  # também acha o Python (python3, python ou py -3)
 : "${KIT_CACHE:=$HOME/.cache/gerente-maquina}" "${KIT_AGENTE_AVISO_K:=150000}" "${KIT_AGENTE_COMPACT:=200000}"
 K1="${AGENTE_API_AVISO_K:-$KIT_AGENTE_AVISO_K}"; K2="${AGENTE_API_ULTIMO_K:-$((KIT_AGENTE_COMPACT - 15000))}"
 EST="${AGENTE_API_ESTADO:-$KIT_CACHE/api-agentes/.avisos}"

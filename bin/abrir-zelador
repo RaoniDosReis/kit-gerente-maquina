@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Abre (ou reabre) a sessão própria do zelador: tmux $KIT_ZELADOR no servidor padrão (o dos projetos), modelo
+# econômico ($KIT_ZELADOR_MODELO), modo $KIT_MODO, Remote Control $KIT_ZELADOR. Pasta: $KIT_CACHE/zelador-sessao,
+# fora da pasta do gerente, para o gerente-laco nunca retomar a conversa do zelador como se fosse a dele.
+# Conversa nova a cada abertura, com o briefing de <pasta>/inicio.txt (criado da skill zelador na 1ª vez).
+#   - sessão tmux aberta com claude vivo dentro: não faz nada;
+#   - aberta mas sem claude (morreu e o pane voltou ao shell): mata a sessão tmux e abre de novo;
+#   - não existe: abre.
+# Sem tmux (Windows nativo): sai com 3 e manda usar o modo agente (§4 da skill zelador).
+# Quem chama: o gerente-laco no boot, o gerente quando o vigia-gerente acusa QUEDA, ou à mão.
+# Uso: abrir-zelador [--seco]   Teste: abrir-zelador --autoteste (tmux falso no PATH; não toca na sessão real)
+set -u
+KIT_LIB="${KIT_LIB:-$HOME/.claude/skills/gerente-da-maquina/lib}"
+[ -f "$KIT_LIB/kit.sh" ] || KIT_LIB="$(dirname "$(readlink -f "$0")")/../skills/gerente-da-maquina/lib"
+# shellcheck disable=SC1091
+. "$KIT_LIB/kit.sh"
+D="${ZELADOR_D_TESTE:-$KIT_CACHE/zelador-sessao}"; Z="$KIT_ZELADOR"
+MODELO_INICIO="$KIT_LIB/../../zelador/inicio.txt"
+T="tmux -S ${ZELADOR_TMUX_SOCK:-/tmp/tmux-$(id -u)/default}"
+
+claude_vivo() {  # há processo "claude" no pane ou descendente dele?
+  local p
+  for p in $($T list-panes -t "=$Z" -F '#{pane_pid}' 2>/dev/null); do
+    ps -eo pid=,ppid=,comm= | awk -v raiz="$p" '
+      { pai[$1] = $2; nome[$1] = $3 }
+      END { for (q in nome) { a = q; n = 0
+              while (a != "" && a != 0 && n++ < 64) { if (a == raiz && nome[q] == "claude") achou = 1; a = pai[a] } }
+            exit !achou }' && return 0
+  done
+  return 1
+}
+
+briefing() {  # cria o inicio.txt da skill, com os nomes deste kit.conf
+  [ -s "$D/inicio.txt" ] && return 0
+  [ -f "$MODELO_INICIO" ] || { echo "falta $D/inicio.txt e o modelo $MODELO_INICIO" >&2; return 1; }
+  [ "${1:-}" = --seco ] && { echo "criaria $D/inicio.txt a partir de $MODELO_INICIO"; return 0; }
+  mkdir -p "$D"
+  sed -e "s/GERENTE/$KIT_GERENTE/g" -e "s/PROJETOS/$(kit_projetos | paste -sd, - | sed 's/,/, /g')/" "$MODELO_INICIO" > "$D/inicio.txt"
+}
+
+if [ "${1:-}" = --autoteste ]; then
+  falhas=0; X=$(mktemp -d); mkdir "$X/bin" "$X/d"
+  cp "$(command -v sleep)" "$X/claude"   # processo com nome "claude", criado pelo próprio teste
+  cat > "$X/bin/tmux" <<'FAKE'
+#!/usr/bin/env bash
+# tmux falso: estado em $FAKE_DIR/estado (aberta|nao); pane_pid em $FAKE_DIR/pid; registra cada chamada
+echo "$*" >> "$FAKE_DIR/log"
+while [ "${1:-}" = -S ]; do shift 2; done
+case "$1" in
+  has-session) [ "$(cat "$FAKE_DIR/estado")" = aberta ] ;;
+  list-panes) [ "$(cat "$FAKE_DIR/estado")" = aberta ] && cat "$FAKE_DIR/pid" || exit 1 ;;
+  kill-session) echo nao > "$FAKE_DIR/estado" ;;
+  new-session) echo aberta > "$FAKE_DIR/estado" ;;
+esac
+FAKE
+  chmod +x "$X/bin/tmux"
+  rodar() { PATH="$X/bin:$PATH" FAKE_DIR="$X" ZELADOR_D_TESTE="$X/d" KIT_CONF=/dev/null KIT_CACHE="$X/cache" \
+            KIT_GERENTE=Chefe KIT_PROJETOS="pA:$X pB:$X" KIT_ZELADOR=zelador KIT_ZELADOR_MODELO=modelo-economico bash "$0" "$@" 2>&1; }
+  "$X/claude" 60 >/dev/null 2>&1 & pv=$!   # pane com claude vivo
+  sleep 60 >/dev/null 2>&1 & pm=$!          # pane só com outro processo
+  sleep 0.4
+  # 1) aberta com claude vivo: não faz nada
+  echo aberta > "$X/estado"; echo "$pv" > "$X/pid"; : > "$X/log"
+  out=$(rodar); grep -q "já aberto" <<<"$out" && ! grep -qE "kill-session|new-session" "$X/log" || { echo "FALHA 1: com claude vivo mexeu ($out)"; falhas=1; }
+  # 2) aberta sem claude: mata e reabre, nessa ordem; o briefing sai com os nomes do kit.conf
+  echo aberta > "$X/estado"; echo "$pm" > "$X/pid"; : > "$X/log"
+  out=$(rodar --seco); grep -q "sem claude" <<<"$out" && ! grep -qE "kill-session|new-session" "$X/log" || { echo "FALHA 2s: --seco mexeu ($out)"; falhas=1; }
+  out=$(rodar); grep -q "kill-session -t =zelador" "$X/log" && grep -q "new-session -d -s zelador" "$X/log" && grep -q "zelador aberto" <<<"$out" \
+    || { echo "FALHA 2: sem claude deveria matar e reabrir ($out)"; falhas=1; }
+  [ "$(grep -E 'kill-session|new-session' "$X/log" | head -1 | grep -c kill-session)" = 1 ] || { echo "FALHA 2: abriu antes de matar"; falhas=1; }
+  grep -q 'to: "Chefe"' "$X/d/inicio.txt" && grep -q "(pA, pB)" "$X/d/inicio.txt" || { echo "FALHA 2: briefing sem os nomes ($(cat "$X/d/inicio.txt"))"; falhas=1; }
+  grep -q -- "--model modelo-economico" "$X/log" && grep -q -- "--permission-mode auto" "$X/log" && grep -q -- "--remote-control zelador" "$X/log" \
+    || { echo "FALHA 2: linha do claude sem modelo, modo ou nome ($(grep new-session "$X/log"))"; falhas=1; }
+  # 3) não existe: abre sem matar
+  echo nao > "$X/estado"; : > "$X/log"
+  out=$(rodar); grep -q "new-session -d -s zelador" "$X/log" && ! grep -q "kill-session" "$X/log" || { echo "FALHA 3: inexistente ($out)"; falhas=1; }
+  # 4) briefing apagado: é recriado do modelo da skill
+  rm "$X/d/inicio.txt"; echo nao > "$X/estado"; : > "$X/log"
+  out=$(rodar); [ -s "$X/d/inicio.txt" ] || { echo "FALHA 4: não recriou o briefing ($out)"; falhas=1; }
+  # 5) sem tmux: sai com 3 e aponta o modo agente
+  mkdir -p "$X/semtmux"; for c in bash sh dirname readlink uname grep sed cat mkdir id paste tr python3; do p=$(command -v "$c") && ln -sf "$p" "$X/semtmux/$c"; done
+  out=$(PATH="$X/semtmux" ZELADOR_D_TESTE="$X/d" KIT_CONF=/dev/null KIT_CACHE="$X/cache" bash "$0" 2>&1); c=$?
+  [ "$c" = 3 ] && grep -q "modo agente" <<<"$out" || { echo "FALHA 5: sem tmux ($c: $out)"; falhas=1; }
+  kill "$pv" "$pm" 2>/dev/null; wait "$pv" "$pm" 2>/dev/null; rm -rf "$X"
+  [ "$falhas" = 0 ] && echo "autoteste: OK" || echo "autoteste: FALHOU"
+  exit "$falhas"
+fi
+
+kit_tem_tmux || { echo "sem tmux: abra o zelador no modo agente (§4 da skill zelador)" >&2; exit 3; }
+briefing "${1:-}" || exit 1
+if $T has-session -t "=$Z" 2>/dev/null; then
+  if claude_vivo; then echo "$Z já aberto"; exit 0; fi
+  [ "${1:-}" = --seco ] && { echo "sessão $Z aberta mas sem claude: mataria a sessão tmux e abriria em $D"; exit 0; }
+  $T kill-session -t "=$Z" 2>/dev/null
+fi
+[ "${1:-}" = --seco ] && { echo "abriria a sessão $Z em $D"; exit 0; }
+mkdir -p "$D"
+$T new-session -d -s "$Z" -c "$D" "cd '$D' && CLAUDE_CODE_AUTO_COMPACT_WINDOW=$KIT_AGENTE_COMPACT PATH=$HOME/.local/bin:\$PATH claude --model $KIT_ZELADOR_MODELO --permission-mode $KIT_MODO --name $Z --remote-control $Z \"\$(cat '$D/inicio.txt')\"; exec bash"
+kit_registrar "zelador: sessão $Z aberta em $D. Desfazer: $T kill-session -t =$Z"
+echo "$Z aberto"

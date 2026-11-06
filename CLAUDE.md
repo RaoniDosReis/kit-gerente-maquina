@@ -13,11 +13,12 @@ máquina: leia, adapte ao sistema daqui e teste antes de ligar. Não copie às c
 
 ## Como conduzir
 1. Diga em 3 linhas o que o kit faz e pergunte se a pessoa quer montar.
-2. Confira o ambiente: `uname -a`, `grep -qi microsoft /proc/version && echo WSL`,
-   `command -v tmux python3 systemctl claude git gh docker`, `systemctl --user is-system-running`.
-   Windows fora do WSL: pare e mostre `docs/windows-wsl.md`.
+2. Confira o ambiente: `bash skills/gerente-da-maquina/lib/plataforma.sh --resumo` (plataforma, Python, systemd,
+   tmux, GPU, rótulos da CI, térmica e o que fica de fora) e `command -v claude git gh docker`.
+   Linux e WSL2: kit completo. Windows nativo (Git Bash): modo básico; mostre `docs/windows-wsl.md` e diga o que fica de fora.
 3. Monte `~/.config/gerente-maquina/kit.conf` a partir de `config/kit.conf.exemplo`, **perguntando**: nome da sessão
    gerente, projetos (nome e pasta), se a CI roda nesta máquina (térmica), meta da semana, orçamento de agentes.
+   GPU e Python são detectados; só force (`KIT_GPU`, `KIT_PY`) se a detecção errar.
    Não invente pastas: confira que existem.
 4. Siga o roteiro **um passo de cada vez**: explique o passo e o porquê, mostre o que vai mudar, monte a peça adaptando
    a referência (ou construindo, onde o roteiro só descreve), rode o autoteste dela e só então passe ao próximo.

@@ -16,7 +16,7 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
    ```bash
    git clone <endereço-do-kit> ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
    ```
-   **Windows**: siga primeiro `docs/windows-wsl.md`, porque o kit roda no WSL2.
+   **Windows**: siga primeiro `docs/windows-wsl.md`: no WSL2 o kit é completo; no Windows nativo (Git Bash), básico.
 2. O Claude Code lê o `CLAUDE.md` do kit e conduz a montagem com você, peça por peça, pelo roteiro
    `skills/gerente-da-maquina/roteiro.md`: o kit é uma rede de **instruções** (o que cada peça faz, por que, como montar);
    os scripts que vêm junto são referência, adaptados à sua máquina antes de ligar. Atalho opcional: `bash instalar.sh
@@ -27,8 +27,11 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 
 ## Requisitos
 - Claude Code com login num plano (Pro/Max/Team) ou chave de API. O monitor de consumo foi feito para planos por assinatura.
-- Linux com systemd de usuário (Ubuntu, Debian, Fedora...) ou Windows com WSL2.
-- `tmux`, `python3` (3.10+), `git`; `gh` para os orquestradores; `docker` opcional.
+- **Completo:** Linux com systemd de usuário (Ubuntu, Debian, Fedora...) ou Windows com WSL2.
+- **Básico:** Windows nativo com Git Bash (hooks, skills, passagem de bastão e orquestração; sem automações, térmica nem tmux).
+- Python 3.10+ (`python3`, `python` ou `py -3`), `git`; `tmux` no Linux/WSL; `gh` para os orquestradores; `docker` opcional.
+- Com ou sem GPU: NVIDIA, AMD, Intel ou nenhuma são detectadas; a térmica e os rótulos da CI se adaptam.
+- `bash instalar.sh --verificar` mostra o que roda nesta máquina e o que fica de fora, com o motivo.
 
 ## O que vem no kit
 | Pasta | Conteúdo |
@@ -37,11 +40,11 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 | `skills/gerente-da-maquina/` | papel da sessão gerente, mapa das peças, regras, procedimentos, biblioteca de configuração |
 | `skills/monitor-de-uso/` | consumo da conta, orientação única, orçamento de agentes, bastão, saúde, processos parados, agentes pela API |
 | `skills/controle-termico/` | perfil da CI local: teto de desempenho que sobe e desce pela temperatura, ventoinhas, relatórios |
-| `skills/zelador/` | o agente que age nas escalações |
+| `skills/zelador/` | o zelador que age nas escalações; como o gerente o abre, reabre e vigia |
 | `skills/orquestrador-de-agentes/` | método do orquestrador: papéis, paralelismo, ciclo do PR, registro de regras e aprendizados |
 | `skills/auditor-de-qualidade/`, `skills/auditor-de-seguranca/` | métodos dos auditores |
 | `hooks/` | início das sessões, passagem de bastão, teto dos agentes, limites de tamanho |
-| `bin/` | `limpar-sessao` e `agente-api` prontos; os lançadores (`gerente`, `sessao-projeto`...) vêm descritos no roteiro |
+| `bin/` | `limpar-sessao`, `abrir-zelador` e `agente-api` prontos; os lançadores (`gerente`, `sessao-projeto`...) vêm descritos no roteiro |
 | `systemd/` | serviços do usuário: gerente, saúde, parados, consumo, térmica, timers |
 | `settings/` | trechos do `~/.claude/settings.json` (hooks, permissões, barra de status) que o instalador mescla |
 | `modelos-projeto/` | o que vai para a pasta de cada projeto: CLAUDE.md modelo, papéis dos agentes, skills de papel, processo |

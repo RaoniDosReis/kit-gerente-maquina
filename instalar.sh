@@ -7,9 +7,18 @@
 # Destinos: skills → ~/.claude/skills/, hooks → ~/.claude/hooks/, bin → ~/.local/bin/,
 # systemd → ~/.config/systemd/user/, settings/statusline.py → ~/.claude/statusline.py,
 # settings/*.json → mesclados em ~/.claude/settings.json.
+# Plataformas: Linux e WSL2 completos; Windows nativo (Git Bash) básico: hooks, skills, passagem de bastão e
+# orquestração. O que é só Linux (systemd, tmux, térmica, ventoinhas) é detectado e fica de fora, com o motivo.
 set -uo pipefail
 KIT="$(cd "$(dirname "$0")" && pwd)"
 CONF="$HOME/.config/gerente-maquina/kit.conf"
+# shellcheck disable=SC1090
+[ -f "$CONF" ] && . "$CONF"   # só para a detecção (KIT_TERM_ATIVA, KIT_FAN_BOOST, KIT_GPU...)
+# shellcheck disable=SC1091
+. "$KIT/skills/gerente-da-maquina/lib/plataforma.sh"
+PY="$(kit_python)" || PY=""
+TERMICA=0; kit_termica >/dev/null && TERMICA=1
+SYSTEMD=0; kit_tem_systemd && SYSTEMD=1
 MODO="${1:-instalar}"
 SECO=0; [ "$MODO" = "--verificar" ] && SECO=1
 LISTA="$HOME/.config/gerente-maquina/instalados.txt"   # o que o kit pôs (para desinstalar)
@@ -44,7 +53,7 @@ autoteste() {
   while read -r f; do
     grep -q -- '--autoteste' "$f" 2>/dev/null || continue
     n=$((n+1))
-    case "$f" in *.py) python3 "$f" --autoteste >/dev/null 2>&1 ;; *) bash "$f" --autoteste >/dev/null 2>&1 ;; esac \
+    case "$f" in *.py) $PY "$f" --autoteste >/dev/null 2>&1 ;; *) bash "$f" --autoteste >/dev/null 2>&1 ;; esac \
       && echo "  OK    $f" || { echo "  FALHA $f"; ok=1; }
   done < <(sort -u "$LISTA" 2>/dev/null | grep -E '(\.sh|\.py|/[^./]+)$')  # só o que o kit instalou
   echo "$n autotestes; $([ $ok = 0 ] && echo todos passaram || echo HÁ FALHAS)"; return $ok
@@ -54,7 +63,7 @@ mescla_settings() {  # mescla settings/*.json do kit em ~/.claude/settings.json 
   local alvo="$HOME/.claude/settings.json"
   if [ "$SECO" = 1 ]; then echo "  [faria] mesclar $(ls "$KIT"/settings/*.json 2>/dev/null | xargs -n1 basename | tr '\n' ' ')em $alvo"; return; fi
   [ -e "$alvo" ] && [ ! -e "$alvo.antes-kit" ] && cp -p "$alvo" "$alvo.antes-kit"
-  python3 -I - "$alvo" "$KIT/settings" <<'PY'
+  $PY -I - "$alvo" "$KIT/settings" <<'PY'
 import glob, json, os, sys
 alvo, pasta = sys.argv[1], sys.argv[2]
 home = os.path.expanduser("~")
@@ -84,9 +93,18 @@ case "$MODO" in
 esac
 
 echo "== verificação"
-for c in python3 tmux git claude systemctl; do command -v "$c" >/dev/null && echo "  ok        $c" || echo "  FALTA     $c"; done
-grep -qi microsoft /proc/version 2>/dev/null && echo "  WSL detectado: veja docs/windows-wsl.md (systemd e térmica)"
-systemctl --user is-system-running >/dev/null 2>&1 || echo "  aviso: systemd do usuário indisponível; os serviços não vão subir"
+[ -n "$PY" ] && echo "  ok        python ($PY)" || echo "  FALTA     python 3.8+ (python3, python ou py -3)"
+for c in git claude; do command -v "$c" >/dev/null && echo "  ok        $c" || echo "  FALTA     $c"; done
+for c in tmux systemctl; do command -v "$c" >/dev/null && echo "  ok        $c" || echo "  sem       $c (opcional: ver \"fica de fora\")"; done
+echo "== plataforma (o que roda aqui)"
+kit_plataforma_resumo
+case "$(kit_plataforma)" in
+  wsl) echo "  WSL: veja docs/windows-wsl.md (systemd, térmica pelo powercfg.exe)" ;;
+  windows) echo "  Windows nativo, modo básico (Git Bash): veja docs/windows-wsl.md" ;;
+esac
+DEFORA=$(kit_fica_de_fora)
+if [ -n "$DEFORA" ]; then echo "  fica de fora:"; sed 's/^/    - /' <<<"$DEFORA"; else echo "  fica de fora: nada"; fi
+[ -n "$PY" ] || { echo "  sem Python o kit não funciona: instale e rode de novo"; [ "$SECO" = 1 ] || exit 1; }
 if [ ! -f "$CONF" ]; then
   echo "  sem $CONF: copie config/kit.conf.exemplo para lá e ajuste (o Claude Code na pasta do kit faz isso com você)"
   [ "$SECO" = 1 ] || exit 1
@@ -100,21 +118,31 @@ while read -r f; do
 done < <(find "$KIT/skills" -type f ! -name '*.pyc' | sort)
 for f in "$KIT"/hooks/*; do [ -f "$f" ] && copia "$f" "$HOME/.claude/hooks/$(basename "$f")" 755; done
 for f in "$KIT"/bin/*; do [ -f "$f" ] && copia "$f" "$HOME/.local/bin/$(basename "$f")" 755; done
-for f in "$KIT"/systemd/*; do [ -f "$f" ] && copia "$f" "$HOME/.config/systemd/user/$(basename "$f")" 644; done
+unidade_fora() {  # unidade -> motivo de não instalar, ou nada
+  [ "$SYSTEMD" = 1 ] || { echo "sem systemd do usuário"; return; }
+  case "$1" in ci-termica.*|termica-*) [ "$TERMICA" = 1 ] || echo "térmica de fora" ;; esac
+}
+for f in "$KIT"/systemd/*; do
+  [ -f "$f" ] || continue
+  m=$(unidade_fora "$(basename "$f")"); [ -n "$m" ] && { echo "  pula      $(basename "$f") ($m)"; continue; }
+  copia "$f" "$HOME/.config/systemd/user/$(basename "$f")" 644
+done
 [ -f "$KIT/settings/statusline.py" ] && copia "$KIT/settings/statusline.py" "$HOME/.claude/statusline.py" 755
 mescla_settings
 faz mkdir -p "$HOME/.claude/passagem"
 
 echo "== serviços"
-faz systemctl --user daemon-reload
-for u in $(servicos_do_kit); do
+[ "$SYSTEMD" = 1 ] || echo "  nenhum: sem systemd do usuário (as automações ficam de fora; os hooks e as skills funcionam)"
+[ "$SYSTEMD" = 1 ] && faz systemctl --user daemon-reload
+for u in $( [ "$SYSTEMD" = 1 ] && servicos_do_kit); do
+  [ -n "$(unidade_fora "$u")" ] && continue
   # timers ligam o próprio serviço; serviço com timer homônimo não é ligado direto
   case "$u" in *.service) [ -f "$KIT/systemd/${u%.service}.timer" ] && continue ;; esac
   # relatório térmico: data a ajustar, a pessoa liga à mão (ver o .timer)
   case "$u" in termica-relatorio.*) echo "  $u: opcional, desligado (ajuste a data e ligue à mão)"; continue ;; esac
   faz systemctl --user enable --now "$u"
 done
-command -v loginctl >/dev/null && ! loginctl show-user "$USER" -p Linger 2>/dev/null | grep -q yes \
+[ "$SYSTEMD" = 1 ] && command -v loginctl >/dev/null && ! loginctl show-user "$USER" -p Linger 2>/dev/null | grep -q yes \
   && echo "  para os serviços subirem no boot sem login: sudo loginctl enable-linger $USER (rode você mesmo)"
 
 echo "== passagem de bastão"

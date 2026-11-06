@@ -16,6 +16,14 @@ KITSH="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/../../gerente-da-maqu
 # shellcheck disable=SC1090
 [ -f "$KITSH" ] && . "$KITSH"
 : "${KIT_CACHE:=$HOME/.cache/gerente-maquina}"
+# temperatura.sh fica na skill controle-termico; ao lado deste script só se alguém o pôs ali.
+AQUI="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")"
+TEMP_SH="$AQUI/temperatura.sh"; [ -f "$TEMP_SH" ] || TEMP_SH="$AQUI/../../controle-termico/scripts/temperatura.sh"
+if [ "${1:-}" = --autoteste ]; then  # só confere que acha o leitor de temperatura e que a saída tem 4 campos
+  t=$(bash "$TEMP_SH" 2>/dev/null); n=$(wc -w <<<"$t")
+  [ -f "$TEMP_SH" ] && [ "$n" = 4 ] && { echo "autoteste: OK ($TEMP_SH: $t)"; exit 0; }
+  echo "FALHA: leitor de temperatura '$TEMP_SH' ausente ou com saída '$t'"; echo "autoteste: FALHOU"; exit 1
+fi
 INT="${1:-30}"; LOG="${SAUDE_LOG:-$KIT_CACHE/saude.log}"
 mkdir -p "$(dirname "$LOG")"
 HEADER="data_hora carga1 carga5 mem_disp_GB swap_GB psi_cpu psi_mem psi_io_full conteineres jobs_ci cpu_pacote_C cpu_nucleo_max_C cpu_mhz gpu_C docker_nucleos docker_mem_GB ci_nucleos ci_mem_GB sessoes_nucleos docker_psi_mem"
@@ -42,7 +50,7 @@ while :; do
   # O pgrep -c já imprime 0 quando não acha (e sai com 1): sem "|| echo 0", que gravava "0" duas
   # vezes e quebrava a linha do log.
   jobs=$(pgrep -c "$KIT_CI_PADRAO" 2>/dev/null); jobs=${jobs:-0}
-  temp=$("$(dirname "$0")/temperatura.sh" 2>/dev/null); [ -n "$temp" ] || temp="- - - -"
+  temp=$(bash "$TEMP_SH" 2>/dev/null); [ -n "$temp" ] || temp="- - - -"
   now_t=$(awk '{printf "%d",$1*1000000}' /proc/uptime)
   now_d=$(usec_docker); now_c=$(usec "$CG_CI"); now_s=$(usec "$CG_SESS")
   if [ -n "$prev_t" ]; then
