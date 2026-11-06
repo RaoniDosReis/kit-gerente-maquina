@@ -1,12 +1,17 @@
 # Windows: WSL2 (completo) ou nativo (básico)
 
-O kit usa bash, tmux, systemd e Python. No Windows há dois caminhos:
-- **WSL2 com Ubuntu (recomendado, completo):** um Linux integrado ao Windows. Tudo funciona, menos o que depende do
-  hardware do host (ver a tabela no fim). O Claude Code tem suporte oficial ao WSL.
-- **Windows nativo, com Git Bash (básico):** hooks, skills, passagem de bastão e orquestração. Sem systemd e sem tmux,
-  as automações, o zelador em sessão própria, a térmica e o `/clear` automático ficam de fora. Ver a última seção.
+O kit usa bash, tmux, systemd e Python. No Windows há dois caminhos, e **a escolha é de quem instala**:
+- **Caminho A, WSL2 com Ubuntu (completo):** um Linux integrado ao Windows. Tudo funciona, menos o que depende do
+  hardware do host (ver a tabela abaixo). O Claude Code tem suporte oficial ao WSL. Pede instalar o WSL (com
+  administrador) e manter os projetos dentro do Ubuntu.
+- **Caminho B, Windows nativo com Git Bash (básico):** hooks, skills, passagem de bastão e orquestração, sem instalar
+  nada além do Git, do Python e do Claude Code. Sem systemd e sem tmux, as automações, o zelador em sessão própria,
+  a térmica e o `/clear` automático ficam de fora. Ver a última seção.
 
-## Instalação (uma vez)
+Escolha antes de começar. O Claude Code do kit pergunta qual caminho você quer e não instala o WSL, nem leva a
+instalação para lá, sem o seu "sim". Dá para começar no nativo e passar para o WSL depois.
+
+## Caminho A: WSL2 (instalação, uma vez)
 1. No PowerShell **como administrador**: `wsl --install -d Ubuntu`. Reinicie o Windows se ele pedir e crie o usuário do Ubuntu.
 2. No Ubuntu, ligue o systemd (os serviços do kit dependem dele):
    ```bash
@@ -40,7 +45,7 @@ e pelo claude.ai/code.
 | Docker | Docker Desktop com a integração WSL ligada |
 | Executor de CI local (GitHub Actions) | instale o executor dentro do Ubuntu |
 
-## Windows nativo (Git Bash): modo básico
+## Caminho B: Windows nativo (Git Bash), modo básico
 O Claude Code para Windows usa o **Git Bash** (do Git para Windows) para o Bash e para os hooks. O kit aproveita isso.
 1. Instale o Git para Windows, o Python 3.8+ (python.org; marque "Add to PATH") e o Claude Code para Windows.
 2. No Git Bash: `git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude`.

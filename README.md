@@ -16,7 +16,13 @@ Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
    ```bash
    git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
    ```
-   **Windows**: siga primeiro `docs/windows-wsl.md`: no WSL2 o kit é completo; no Windows nativo (Git Bash), básico.
+   **Windows: você escolhe onde instalar.** As duas formas são possíveis:
+   - **No WSL2** (um Ubuntu dentro do Windows): o kit fica completo.
+   - **Nativo no Windows** (Git Bash): o kit fica básico (hooks, skills, passagem de bastão e orquestração; sem
+     automações, térmica nem tmux).
+
+   Os passos de cada uma estão em `docs/windows-wsl.md`. O Claude Code pergunta qual você quer antes de montar e nunca
+   instala o WSL sem o seu "sim".
 2. O Claude Code lê o `CLAUDE.md` do kit e conduz a montagem com você, peça por peça, pelo roteiro
    `skills/gerente-da-maquina/roteiro.md`: o kit é uma rede de **instruções** (o que cada peça faz, por que, como montar);
    os scripts que vêm junto são referência, adaptados à sua máquina antes de ligar. Atalho opcional: `bash instalar.sh

@@ -15,7 +15,11 @@ máquina: leia, adapte ao sistema daqui e teste antes de ligar. Não copie às c
 1. Diga em 3 linhas o que o kit faz e pergunte se a pessoa quer montar.
 2. Confira o ambiente: `bash skills/gerente-da-maquina/lib/plataforma.sh --resumo` (plataforma, Python, systemd,
    tmux, GPU, rótulos da CI, térmica e o que fica de fora) e `command -v claude git gh docker`.
-   Linux e WSL2: kit completo. Windows nativo (Git Bash): modo básico; mostre `docs/windows-wsl.md` e diga o que fica de fora.
+   Linux e WSL2: kit completo. Windows nativo (Git Bash): modo básico.
+   **Windows: a pessoa escolhe onde instalar.** Se a máquina é Windows (plataforma `windows` ou `wsl`), mostre as duas
+   opções de `docs/windows-wsl.md` (WSL2 completo, nativo básico, com o que fica de fora em cada uma) e pergunte qual ela
+   quer. Nunca instale o WSL, nem mude a instalação para o WSL, sem o "sim" dela; se ela escolher o nativo, siga no
+   nativo. Aberto no Git Bash, não presuma WSL; aberto no WSL, confirme que é lá que ela quer o kit.
 3. Monte `~/.config/gerente-maquina/kit.conf` a partir de `config/kit.conf.exemplo`, **perguntando**: nome da sessão
    gerente, projetos (nome e pasta), se a CI roda nesta máquina (térmica), meta da semana, orçamento de agentes.
    GPU e Python são detectados; só force (`KIT_GPU`, `KIT_PY`) se a detecção errar.
