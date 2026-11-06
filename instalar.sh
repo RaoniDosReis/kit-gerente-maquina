@@ -99,8 +99,8 @@ for c in tmux systemctl; do command -v "$c" >/dev/null && echo "  ok        $c" 
 echo "== plataforma (o que roda aqui)"
 kit_plataforma_resumo
 case "$(kit_plataforma)" in
-  wsl) echo "  WSL: veja docs/windows-wsl.md (systemd, térmica pelo powercfg.exe)" ;;
-  windows) echo "  Windows nativo, modo básico (Git Bash): veja docs/windows-wsl.md" ;;
+  wsl) echo "  WSL (caminho A, completo): confirme que é aqui que você quer o kit; o nativo (caminho B) também é possível. Ver docs/windows-wsl.md" ;;
+  windows) echo "  Windows nativo (caminho B, básico, Git Bash). O WSL2 (caminho A, completo) é opcional e só com o seu sim. Ver docs/windows-wsl.md" ;;
 esac
 DEFORA=$(kit_fica_de_fora)
 if [ -n "$DEFORA" ]; then echo "  fica de fora:"; sed 's/^/    - /' <<<"$DEFORA"; else echo "  fica de fora: nada"; fi

@@ -1,6 +1,6 @@
-# Windows com WSL2 (Ubuntu)
+# Windows: WSL2 (completo) ou nativo (básico)
 
-O kit roda dentro do WSL2; o Windows só abre terminais e liga o WSL.
+No Windows, **quem instala escolhe** entre o WSL2 (caminho A, completo) e o nativo no Git Bash (caminho B, básico); compare os dois em `docs/windows-wsl.md` e pergunte antes. Nunca instale o WSL, nem leve a instalação para lá, sem o "sim" da pessoa. Os passos abaixo são do caminho A: no WSL2, o kit roda dentro do Ubuntu e o Windows só abre terminais e liga o WSL.
 
 1. **Instalar:** no PowerShell do Windows, `wsl --install -d Ubuntu`, reiniciar, criar o usuário.
 2. **Ligar o systemd:** no Ubuntu, `sudo tee /etc/wsl.conf <<< $'[boot]\nsystemd=true'`; no PowerShell, `wsl --shutdown` e abrir de novo. Conferir: `systemctl --user status`. Instalar `tmux` (`sudo apt install tmux`).
