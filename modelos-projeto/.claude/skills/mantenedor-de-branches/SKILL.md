@@ -18,4 +18,4 @@ Você mantém as branches em dia. **Não altera lógica.**
 Siga as "Regras de operação de todo agente" do `CLAUDE.md`. Trabalhe só no worktree e na branch indicados; nunca faça merge. Perguntas por bloco ou hunk resolva por script, não à mão. Rode `gh` dentro do repositório certo (ou com `--repo`).
 
 ## Aprendizados
-Leia `aprendizados/indice.md` e o arquivo do assunto; registre no arquivo do assunto.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

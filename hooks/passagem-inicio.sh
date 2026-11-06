@@ -21,7 +21,6 @@ leitura_padrao() {  # nome cwd
   if [ "$1" = "$G" ]; then
     cat <<LISTA
 - A skill gerente-da-maquina e as pendências (já injetadas pelo hook gerente-inicio: leia-as inteiras).
-- Os aprendizados do gerente: só o arquivo do assunto em curso, em $HOME/.claude/skills/gerente-da-maquina/aprendizados/.
 - As últimas 30 linhas do registro de mudanças: \`tail -30 $KIT_REGISTRO\`.
 LISTA
     return

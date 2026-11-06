@@ -42,7 +42,7 @@ Escalações chegam pelo zelador (SendMessage para `main`). Levo ao dono o que p
 - Segurança global: `settings/permissoes.json` nega ssh, token do gh, credenciais, sudo, push na main, git stash e pkill -f.
 
 ## Procedimentos
-- **Mudar uma automação:** edite o script; rode o `--autoteste`; confirme que o teste falha com o defeito (mutação numa cópia); script em uso por vigia, grave noutro arquivo e `mv -f` por cima; reinicie o serviço; registre em `$KIT_REGISTRO` e na skill dele, e aqui se mudar regra.
+- **Mudar uma automação:** edite o script; rode o `--autoteste` (caminhos isolados por variável; teste que passa de primeira é suspeito); confirme que o teste falha com o defeito (mutação numa cópia); script em uso por vigia, grave noutro arquivo e `mv -f` por cima; reinicie o serviço; registre em `$KIT_REGISTRO` e na skill dele, e aqui se mudar regra.
 - **Meus agentes ocupam vaga:** entram no mesmo orçamento dos projetos. Não lance agente com o caminho crítico de um projeto esperando vaga; prefira fazer eu mesmo.
 - **Mensagem a orquestrador:** curta, decisão na primeira linha, "Sem resposta" quando não precisar de volta.
 - **Espiar uma sessão de projeto:** `tmux -S /tmp/tmux-$(id -u)/default capture-pane -p -t NOME:`. Texto na caixa de digitação é sugestão automática, não mensagem esquecida.
@@ -53,4 +53,17 @@ Escalações chegam pelo zelador (SendMessage para `main`). Levo ao dono o que p
 ## Como o dono fala com as sessões
 Terminal (`gerente`, `sessao-projeto NOME`, que anexam ao tmux), celular e claude.ai/code (Remote Control: o nome da sessão aparece no app) ou mensagem entre sessões. Ele decide; eu aviso o que pede decisão.
 
-Detalhes, só o do assunto: `roteiro.md` (montar a casa do zero, ordem e porquê de cada peça), `passagem.md` (mecanismo do bastão), `padrao-agentes.md` (contexto dos agentes), `padrao-consolidacao.md` (andamento), `hardware.md` (a máquina), `windows-wsl.md` (Windows com WSL2), `pendencias.md` (o que está aberto), `aprendizados/` (o que deu errado e a regra que ficou).
+Detalhes, só o do assunto: `roteiro.md` (montar a casa do zero, ordem e porquê de cada peça), `passagem.md` (mecanismo do bastão), `padrao-agentes.md` (contexto dos agentes), `padrao-consolidacao.md` (andamento), `hardware.md` (a máquina), `windows-wsl.md` (Windows com WSL2), `pendencias.md` (o que está aberto).
+
+## Aprendizados
+Regra curta e genérica; a lição de uma máquina ou projeto vai ao registro dele.
+- `claude --continue` só vê conversas interativas: retome pelo id (`--resume`); 403 no Remote Control de conversa retomada: `--fork-session`.
+- Bash em segundo plano tem prazo padrão: vigia longo com `timeout` explícito. Agente `finished` com tarefa de fundo viva ainda trabalha.
+- Script que faz `exec` muda de nome no `ps` (o bash faz `exec` do último comando; em teste, termine com `; : marcador`).
+- `pgrep -f` num laço casa a própria linha: espere pelo PID (`tail --pid`) ou por arquivo.
+- Teste de log ou de despacho em segundo plano: espere o efeito, não confira na hora.
+- Serviço systemd que cria o servidor do tmux o mata ao reiniciar: `tmux -L` próprio; `KillMode=process` no que deve sobreviver.
+- Hook: identifique a sessão por `transcript_path`, não pelo `cwd`; o Stop só roda no fim do turno; o SubagentStop vem com `last_assistant_message` vazio depois do SubagentHandback (relatório no `tool_use`; teste em sessão interativa).
+- Compare caminhos com `realpath` dos dois lados.
+- Modo auto barra editar lançadores: não contorne; deixe o script para o dono rodar com `! bash`.
+- Fluxo agendado de projeto parado: desligue (falha diária vira ruído).

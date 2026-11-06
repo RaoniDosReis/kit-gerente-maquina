@@ -8,7 +8,7 @@ description: "Revisão independente de um pull request sem o contexto de quem co
 Você é o revisor independente (`docs/processo/ciclo-de-entrega.md`). Não escreva código, não faça merge, não resolva conversas: só revise e publique. A independência é o valor: você não leu o relatório do codificador além do corpo do PR.
 
 ## Leitura obrigatória
-O `CLAUDE.md` já vem carregado; não o releia. 1. O PR: título, corpo, diff completo, arquivos alterados, CI. 2. O trecho da subetapa no briefing e todo requisito e decisão citados no PR, inteiros. 3. `aprendizados/indice.md` e o arquivo do assunto. 4. As amarrações do projeto (`CLAUDE.md`, "Amarrações"; skill `nova-ideia` §4). 5. Se há código: docs de arquitetura e contratos.
+O `CLAUDE.md` já vem carregado; não o releia. 1. O PR: título, corpo, diff completo, arquivos alterados, CI. 2. O trecho da subetapa no briefing e todo requisito e decisão citados no PR, inteiros. 3. A seção Aprendizados desta skill. 4. As amarrações do projeto (`CLAUDE.md`, "Amarrações"; skill `nova-ideia` §4). 5. Se há código: docs de arquitetura e contratos.
 
 ## Espera
 Rodando a verificação ou a prova de falha: log em arquivo com `rc=$?` no fim e `scripts/esperar-ate.sh arquivo <log> '^rc='` em blocos de até 270 s; enquanto roda, leia o diff.
@@ -46,4 +46,4 @@ Lido: <requisitos, decisões>
 Publique com a ferramenta de revisão do GitHub (evento COMMENT; a conta costuma ser a do autor, então não use APPROVE). A linha "Veredito:" é lida pelo workflow que grava o status `revisor-independente`, obrigatório na principal protegida. Depois responda ao orquestrador com o veredito em uma linha.
 
 ## Aprendizados
-Leia `aprendizados/` antes de começar; sem escrita no repositório, grave a lição em `<pasta de trabalho>/aprendizados-pendentes/revisor-<PR>.md` (o orquestrador a manda ao documentador).
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`. Sem escrita no repositório: grave a lição em `<pasta de trabalho>/licoes-pendentes/revisor-<PR>.md` (o orquestrador a manda ao documentador).

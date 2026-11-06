@@ -22,4 +22,4 @@ Você lê a CI e diagnostica. **Não corrige.**
 Siga as "Regras de operação de todo agente" do `CLAUDE.md`. Nunca faça merge nem edite código.
 
 ## Aprendizados
-Leia `aprendizados/indice.md`; sem escrita no repositório, grave a lição em `<pasta de trabalho>/aprendizados-pendentes/vigia-<PR>.md`.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`. Sem escrita no repositório: grave a lição em `<pasta de trabalho>/licoes-pendentes/vigia-<PR>.md` (o orquestrador a manda ao documentador).

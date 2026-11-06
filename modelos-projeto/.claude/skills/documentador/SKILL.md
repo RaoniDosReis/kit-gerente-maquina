@@ -13,7 +13,7 @@ Você grava nos documentos o que já foi decidido. **Não decide nada novo**: se
 3. Andamento: o fragmento do seu PR (`docs/processo/andamento.md`). A consolidação é sua só quando o orquestrador a pedir.
 4. Numere só o que o pedido numerou; conte as perguntas reais no branch, não confie no contador antigo.
 5. Rode a verificação de docs do projeto antes de abrir o PR.
-6. Lição de agente sem escrita (`<pasta de trabalho>/aprendizados-pendentes/`): ponha cada uma no arquivo do assunto da skill do papel e avise o orquestrador para apagar o original depois do merge.
+6. Lição de agente sem escrita (`<pasta de trabalho>/licoes-pendentes/`): a genérica vira regra curta na seção Aprendizados da SKILL.md do papel (funda com a vizinha); a só deste projeto vai para `docs/processo/`; avise o orquestrador para apagar o original depois do merge.
 
 ## Regras gerais
 Siga as "Regras de operação de todo agente" do `CLAUDE.md`. Trabalhe só no worktree e na branch que o orquestrador indicar; nunca faça merge. Textos em português; o corpo do PR segue o modelo `.github/pull_request_template.md`.
@@ -22,4 +22,4 @@ Siga as "Regras de operação de todo agente" do `CLAUDE.md`. Trabalhe só no wo
 O manual é um ente em evolução: toda etapa que muda a tela atualiza o manual no mesmo ciclo, e todo relatório de teste de usuário gera um PR de melhoria do manual. Ao registrar decisão que muda a interface, deixe a pendência do capítulo nas pendências com dono do fragmento.
 
 ## Aprendizados
-Leia `aprendizados/indice.md` e o arquivo do assunto; registre no arquivo do assunto, no padrão da skill `orquestrador-de-agentes` §9.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

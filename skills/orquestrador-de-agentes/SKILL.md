@@ -23,7 +23,7 @@ A skill `orquestrador` do próprio projeto (`.claude/skills/orquestrador/`) venc
 | Mantenedor de branches | apoio | econômico | atualiza a branch com a principal, conflitos de documentação, duplicatas | não mexe em lógica |
 | Vigia da CI | apoio | econômico | lê os logs da CI vermelha, separa falha real de intermitente, entrega o diagnóstico | não corrige |
 | Auditor de segurança | agente fixo por PR ou lote | capaz | revisa a segurança dos PRs de superfície de ataque, em paralelo ao revisor (skill `auditor-de-seguranca`) | não corrige |
-| Auditor de qualidade | periódico e sob demanda | capaz | lê regras, memória, skills e aprendizados; relata conflitos, redundâncias e desperdício e propõe melhorias (skill `auditor-de-qualidade`) | não altera nada além dos próprios aprendizados |
+| Auditor de qualidade | periódico e sob demanda | capaz | lê regras, memória, skills e aprendizados; relata conflitos, redundâncias e desperdício e propõe melhorias (skill `auditor-de-qualidade`) | não altera nada; a própria lição vai como pendente (§9.2) |
 
 Pesquisa pontual (varrer docs e código e devolver um relatório) vai a um agente econômico com a instrução "não edite nada".
 
@@ -106,9 +106,9 @@ O agente só sabe o que está no prompt (e no corpo do papel). Tudo o que import
 ## 8. Autoaperfeiçoamento
 **Um erro só pode acontecer uma vez por motivo.** Gatilhos (qualquer um obriga a parar e registrar): bloqueante do revisor; CI vermelha repetida; PR acima do limite; conflito de merge; merge desfeito logo depois; correção do dono; incidente de ambiente; decisão tomada com dado velho; descoberta que o próximo orquestrador precisaria saber.
 
-**Formato da lição:** o fato, a causa (não o sintoma), a regra derivada e **o lugar onde a regra foi aplicada**. Lição sem lugar de aplicação não está pronta. Só o incidente que mudou uma regra vira lição numerada; o truque técnico vai em uma linha para `aprendizados/` do papel.
+**Formato da lição:** o fato, a causa (não o sintoma), a regra derivada e **o lugar onde a regra foi aplicada**. Lição sem lugar de aplicação não está pronta. Só o incidente que mudou uma regra vira lição numerada; o truque técnico genérico vai em uma linha para a seção Aprendizados da skill do papel; o específico do projeto, para `docs/processo/`.
 
-**Onde cada regra mora, do mais forte ao mais fraco:** 1. verificação automática (script, CI, hook, teste); 2. `CLAUDE.md` do projeto (vale para todo agente); 3. skill do papel; 4. briefing da etapa; 5. `aprendizados/` do papel; 6. memória (máquina, estado vivo, preferência do dono); 7. esta skill (método de qualquer projeto). Regra que só vive na memória de um modelo se perde na troca de modelo. Lição repetida em duas etapas sobe para a verificação automática.
+**Onde cada regra mora, do mais forte ao mais fraco:** 1. verificação automática (script, CI, hook, teste); 2. `CLAUDE.md` do projeto (vale para todo agente); 3. skill do papel; 4. briefing da etapa; 5. seção Aprendizados da skill do papel (só o genérico; o específico do projeto vai a `docs/processo/`); 6. memória (máquina, estado vivo, preferência do dono); 7. esta skill (método de qualquer projeto). Regra que só vive na memória de um modelo se perde na troca de modelo. Lição repetida em duas etapas sobe para a verificação automática.
 
 **Auditor de qualidade.** Depois de muitas interações as regras tendem a se contradizer e os aprendizados a crescer. O orquestrador ou o dono chama o auditor (skill `auditor-de-qualidade`) toda semana, no reinício do uso, e sob demanda, quando houver: falha ou rodada extra repetida em 2 PRs; regra que contradiz outra, ou correção do dono; limites da §9.4 passados; CI ou ciclo mais lentos sem motivo claro; fim de fase ou portão. Ele só lê e relata; **só o orquestrador altera** as regras, a partir do relatório. Decisão que dependa do dono vai a ele antes, com contexto completo.
 
@@ -124,18 +124,18 @@ O agente só sabe o que está no prompt (e no corpo do papel). Tudo o que import
 ## 9. Como registrar regras e aprendizados
 **Objetivo:** cada regra num lugar só, curta, sem contradizer outra; o que se lê em toda sessão fica mínimo.
 
-**9.1 Onde mora** (use o primeiro que couber): 1. checável por máquina → verificação automática, e a regra escrita vira uma linha que aponta para ela; 2. vale para todo agente → `CLAUDE.md`; 3. só para um papel → skill do papel; 4. só para uma etapa → briefing; 5. truque técnico que custou tempo → `aprendizados/<assunto>.md` da skill do papel; 6. máquina, estado vivo ou preferência do dono → memória; 7. método para qualquer projeto → esta skill.
+**9.1 Onde mora** (use o primeiro que couber): 1. checável por máquina → verificação automática, e a regra escrita vira uma linha que aponta para ela; 2. vale para todo agente → `CLAUDE.md`; 3. só para um papel → skill do papel; 4. só para uma etapa → briefing; 5. truque técnico que custou tempo → se vale para qualquer projeto, regra curta na seção Aprendizados da SKILL.md do papel; se é do projeto, no documento do assunto em `docs/processo/`; 6. máquina, estado vivo ou preferência do dono → memória; 7. método para qualquer projeto → esta skill.
 
 **Não registre** o que já está escrito noutro lugar (cite), estado (vai para a memória de estado, reescrita), o que o `git log` guarda, o que vale uma vez, opinião sem decisão nem dado.
 
 **9.2 Modelos fixos**
 - **Regra** (até 3 linhas ou 60 palavras): `- **<assunto>:** <o que fazer, no imperativo>. <porquê em meia frase>. (<quem decidiu>; substitui <regra antiga>)`
-- **Aprendizado:** um arquivo por assunto, com `indice.md` de uma linha por assunto; uma lição por item, até 6 linhas: `## <título que já diz a regra>` e as linhas Origem, Sintoma, Causa e regra, Prova. Papel sem escrita no repositório (revisor, auditores, vigia da CI) grava a lição em `~/.cache/gerente-maquina/<projeto>/aprendizados-pendentes/<papel>-<PR ou data>.md`, e o orquestrador a manda ao documentador.
+- **Aprendizado:** só o genérico (vale para qualquer pessoa, projeto e máquina), na seção `## Aprendizados` no fim da SKILL.md do papel, 1 a 2 linhas: `- **<assunto>:** <regra no imperativo>; <porquê em meia frase>.` Sem data, nome, número local nem história do incidente. O específico do projeto vai para `docs/processo/`. Papel sem escrita no repositório (revisor, auditores, vigia da CI) grava a lição em `~/.cache/gerente-maquina/<projeto>/licoes-pendentes/<papel>-<PR ou data>.md`, e o orquestrador a manda ao documentador.
 - **Memória:** até 25 linhas, só o que vale hoje; o histórico vai para um arquivo fora do índice; índice de uma linha por memória.
 
 **9.3 Checagem antes de inserir (obrigatória):** procure regra igual ou vizinha com `grep -rniE '<termos>'` na memória, nas skills, no `CLAUDE.md` e nos docs de processo. Igual: não crie. Parecida: funda. Contraditória: reescreva a antiga em todos os lugares, marque "substitui …" e apague a velha. Decisão do dono: memória na hora; repositório no próximo PR do documentador.
 
-**9.4 Manutenção:** fim de etapa, aprendizado novo entra no arquivo do assunto. Aprendizado que virou regra ou verificação sai, deixando "(ex-aprendizado <assunto>)" na regra. Alerta para consolidar: índice da memória com mais de 15 linhas, memória com mais de 25, `CLAUDE.md` com mais de 3 mil tokens, aprendizados de um papel com mais de 5 mil.
+**9.4 Manutenção:** fim de etapa, aprendizado novo entra na seção Aprendizados (funda com o vizinho). Aprendizado que virou regra ou verificação sai da seção. Alerta para consolidar: índice da memória com mais de 15 linhas, memória com mais de 25, `CLAUDE.md` com mais de 3 mil tokens, seção Aprendizados de um papel com mais de 30 linhas, SKILL.md com mais de 500.
 
 ## 10. Lições que valem para qualquer projeto
 - Briefing sem divisão prevista gera PR de 1.000 a 1.600 linhas; com a divisão e a contagem antes do PR, o tamanho fica sob controle.
@@ -146,4 +146,28 @@ O agente só sabe o que está no prompt (e no corpo do papel). Tudo o que import
 - Esperar em primeiro plano só em blocos curtos (até cerca de 270 s): sessão parada mais de 5 min relê o contexto inteiro a preço cheio. Espera longa se entrega e se termina.
 - Cada despertar de vigia relê o contexto: vigia só avisa em mudança de estado.
 
-Os aprendizados técnicos desta skill estão em `aprendizados/` (leia o assunto da tarefa).
+## 11. Aprendizados
+
+**CI e fluxos agendados**
+- **Varredura verde:** "zero achados" só vale para os alvos que o scanner leu; peça a lista de alvos contra `git ls-files | grep -i lock` e os avisos.
+- **Item instável:** peça o motivo que a ferramenta dá, a reprodução determinística da condição de carga e a correção no teste e no produto; recuse prazo maior.
+- **Falha só sob carga:** costuma ser dois relógios no mesmo teste; o código aceita o relógio por parâmetro e o teste passa um só.
+- **Vigia mudo:** vigia que joga erro em `2>/dev/null` deixa a sessão parada; todo vigia tem prazo, conta de erros e mensagem de saída, testados contra a versão instalada da ferramenta.
+- **Junção de relatórios de jobs:** copiar várias pastas de artefatos para uma plana sobrescreve nomes iguais; use lista por pasta ou recuse repetido.
+
+**Git e arquivos compartilhados**
+- **`git stash`:** a pilha é a mesma em todos os worktrees; nunca use (commit WIP ou cópia em pasta própria).
+- **Nomes:** scratchpad, worktree e ambiente são compartilhados; dê no briefing o nome `<etapa ou PR>-<papel>[-r<rodada>]`; nome já existente é de outro agente.
+- **Saída gerada no repositório:** ao tirar uma regra do `.gitignore`, confira `git ls-files` contra os nomes que os scripts geram e rode `git show --stat` no commit.
+- **Limpeza:** só pelo caminho exato numa variável, nunca com glob, nem em arquivo de teste.
+
+**Revisão independente**
+- **Prova sem mexer no worktree:** extraia o código antigo ou mutado com `git archive <commit> <pastas> | tar -x -C <cópia>` e rode de lá, conferindo de onde o pacote foi importado.
+- **Merge que a CI testa:** reproduza num clone descartável (merge `--no-ff` sobre a principal avançada, fetch raso do SHA, variáveis de ambiente da CI de cada evento).
+- **Primitiva de concorrência própria:** confira a alegação na versão atual da biblioteca num ambiente descartável e meça a fome com o número real de processos.
+- **Trava em pasta comum entre usuários:** `fs.protected_regular` nega `O_CREAT` em arquivo alheio; no bash, `exec {fd}<` não é close-on-exec, e um filho segura o `flock`.
+- **Segredo em exceção:** o texto de erro de validação pode trazer o valor de entrada; procure `str(exc)` perto de log.
+- **Defesa por cabeçalho ou política:** pergunte "se eu apagar a linha, o teste falha?"; plante o ataque (um `<script>` no conteúdo) e veja se o build passa.
+- **Acessibilidade:** confira a árvore de acessibilidade no instante do foco real, pelo teclado (`Tab`), e depois do atraso.
+- **Corrida no banco:** prove sem `sleep`, com um lado parado por evento segurando as travas e o outro esperando aparecer na visão de atividade do banco.
+- **Lição de auditor:** a frase sobre o estado atual do código é achado aberto, não aprendizado; mantenha só o método até a correção entrar.

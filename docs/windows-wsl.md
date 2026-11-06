@@ -12,7 +12,7 @@ integrado ao Windows. O Claude Code tem suporte oficial ao WSL.
    No PowerShell: `wsl --shutdown`. Abra o Ubuntu de novo e confira: `systemctl --user is-system-running`.
 3. No Ubuntu: `sudo apt update && sudo apt install -y tmux python3 git curl unzip`.
 4. Instale o Claude Code **dentro do Ubuntu** (siga a instalação oficial para Linux) e faça login com `claude`.
-5. Clone o kit no Ubuntu (`git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina`) ou copie o `.zip` (o disco C: aparece em `/mnt/c/`), por exemplo:
+5. Clone o kit no Ubuntu (`git clone <endereço-do-kit> ~/kit-gerente-maquina`, com o endereço deste repositório ou do seu fork) ou copie o `.zip` (o disco C: aparece em `/mnt/c/`), por exemplo:
    `unzip /mnt/c/Users/<você>/Downloads/kit-gerente-maquina.zip -d ~/`
 6. `cd ~/kit-gerente-maquina && claude`. O Claude Code lê o `CLAUDE.md` do kit e conduz a instalação.
 

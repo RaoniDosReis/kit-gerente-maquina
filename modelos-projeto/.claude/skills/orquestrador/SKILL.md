@@ -34,4 +34,4 @@ Leia, nesta ordem, antes de qualquer ação (o `CLAUDE.md` já vem carregado): `
 Antes de encerrar a sessão (o fim é `/clear` com passagem escrita, nunca compactação): Estado de cada briefing correto; fragmentos de andamento dos PRs mesclados; memória do projeto com os agentes vivos, worktrees e o que é só da máquina; esta skill com as lições incorporadas; nenhum PR aberto sem dizer em que passo do ciclo está. O próximo orquestrador começa pela seção 1.
 
 ## Aprendizados
-Leia `aprendizados/indice.md` antes de começar e registre no arquivo do assunto.
+Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.

@@ -29,4 +29,4 @@ Resultado: TODAS AS TAREFAS OK | FALHAS
 O orquestrador aciona um codificador para as sugestões de desempenho e segurança; as outras vão ao dono, com a explicação inteira. Todo relatório gera um PR de melhoria do manual (o orquestrador aciona o documentador).
 
 ## Aprendizados
-Exceção ao "não leia nada além do manual": os arquivos de `aprendizados/` desta skill são seus e podem ser lidos; não contêm código. Registre no arquivo do assunto.
+Exceção ao "não leia nada além do manual": esta seção é sua e não contém código. Regras curtas (1 a 2 linhas, sem data nem história) que valem para qualquer projeto ficam nesta seção. Lição nova: se é genérica, entra aqui como regra, no padrão da skill `orquestrador-de-agentes` §9; se é só deste projeto, vai para o documento do assunto em `docs/processo/`.
