@@ -12,9 +12,9 @@ Um jeito organizado de trabalhar com o **Claude Code** numa estação de desenvo
 Tudo funciona por skills, hooks e serviços do usuário. Nada roda como root.
 
 ## Começar
-1. **Linux**: clone o kit (troque `<endereço-do-kit>` pelo endereço deste repositório ou do seu fork) e abra o Claude Code dentro da pasta:
+1. **Linux**: clone o kit (ou o seu fork) e abra o Claude Code dentro da pasta:
    ```bash
-   git clone <endereço-do-kit> ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
+   git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude
    ```
    **Windows**: siga primeiro `docs/windows-wsl.md`: no WSL2 o kit é completo; no Windows nativo (Git Bash), básico.
 2. O Claude Code lê o `CLAUDE.md` do kit e conduz a montagem com você, peça por peça, pelo roteiro

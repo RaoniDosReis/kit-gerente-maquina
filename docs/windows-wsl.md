@@ -15,7 +15,7 @@ O kit usa bash, tmux, systemd e Python. No Windows há dois caminhos:
    No PowerShell: `wsl --shutdown`. Abra o Ubuntu de novo e confira: `systemctl --user is-system-running`.
 3. No Ubuntu: `sudo apt update && sudo apt install -y tmux python3 git curl unzip`.
 4. Instale o Claude Code **dentro do Ubuntu** (siga a instalação oficial para Linux) e faça login com `claude`.
-5. Clone o kit no Ubuntu (`git clone <endereço-do-kit> ~/kit-gerente-maquina`, com o endereço deste repositório ou do seu fork) ou copie o `.zip` (o disco C: aparece em `/mnt/c/`), por exemplo:
+5. Clone o kit no Ubuntu (`git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina`, ou o seu fork) ou copie o `.zip` (o disco C: aparece em `/mnt/c/`), por exemplo:
    `unzip /mnt/c/Users/<você>/Downloads/kit-gerente-maquina.zip -d ~/`
 6. `cd ~/kit-gerente-maquina && claude`. O Claude Code lê o `CLAUDE.md` do kit e conduz a instalação.
 
@@ -43,7 +43,7 @@ e pelo claude.ai/code.
 ## Windows nativo (Git Bash): modo básico
 O Claude Code para Windows usa o **Git Bash** (do Git para Windows) para o Bash e para os hooks. O kit aproveita isso.
 1. Instale o Git para Windows, o Python 3.8+ (python.org; marque "Add to PATH") e o Claude Code para Windows.
-2. No Git Bash: `git clone <endereço-do-kit> ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude`.
+2. No Git Bash: `git clone https://github.com/RaoniDosReis/kit-gerente-maquina.git ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude`.
 3. `bash instalar.sh --verificar` mostra a plataforma (`windows`), o Python achado (`python3`, `python` ou `py -3`;
    `KIT_PY` no `kit.conf` força um) e a lista **fica de fora**, com o motivo de cada peça.
 
