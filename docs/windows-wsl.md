@@ -1,7 +1,10 @@
-# Windows: rodar o kit no WSL2
+# Windows: WSL2 (completo) ou nativo (básico)
 
-O kit usa bash, tmux, systemd e Python. No Windows, rode tudo dentro do **WSL2 com Ubuntu**, que é um Linux completo
-integrado ao Windows. O Claude Code tem suporte oficial ao WSL.
+O kit usa bash, tmux, systemd e Python. No Windows há dois caminhos:
+- **WSL2 com Ubuntu (recomendado, completo):** um Linux integrado ao Windows. Tudo funciona, menos o que depende do
+  hardware do host (ver a tabela no fim). O Claude Code tem suporte oficial ao WSL.
+- **Windows nativo, com Git Bash (básico):** hooks, skills, passagem de bastão e orquestração. Sem systemd e sem tmux,
+  as automações, o zelador em sessão própria, a térmica e o `/clear` automático ficam de fora. Ver a última seção.
 
 ## Instalação (uma vez)
 1. No PowerShell **como administrador**: `wsl --install -d Ubuntu`. Reinicie o Windows se ele pedir e crie o usuário do Ubuntu.
@@ -36,3 +39,24 @@ e pelo claude.ai/code.
 | Controle térmico da CI | o WSL não alcança a CPU nem as ventoinhas do host. Há um modo opcional (`KIT_TERM_WINDOWS=1`) que limita o desempenho máximo da CPU pelo `powercfg.exe` do Windows durante a CI e repõe ao final. Sem leitura de temperatura: o teto fica fixo |
 | Docker | Docker Desktop com a integração WSL ligada |
 | Executor de CI local (GitHub Actions) | instale o executor dentro do Ubuntu |
+
+## Windows nativo (Git Bash): modo básico
+O Claude Code para Windows usa o **Git Bash** (do Git para Windows) para o Bash e para os hooks. O kit aproveita isso.
+1. Instale o Git para Windows, o Python 3.8+ (python.org; marque "Add to PATH") e o Claude Code para Windows.
+2. No Git Bash: `git clone <endereço-do-kit> ~/kit-gerente-maquina && cd ~/kit-gerente-maquina && claude`.
+3. `bash instalar.sh --verificar` mostra a plataforma (`windows`), o Python achado (`python3`, `python` ou `py -3`;
+   `KIT_PY` no `kit.conf` força um) e a lista **fica de fora**, com o motivo de cada peça.
+
+| Peça | Windows nativo |
+|---|---|
+| Skills, `CLAUDE.md`, orquestrador e agentes | funcionam |
+| Hooks (início do gerente, passagem de bastão, limite de tamanho) | funcionam no Git Bash, sem `/proc`, `systemctl` nem `pgrep` |
+| Passagem de bastão | os avisos e a passagem funcionam; o `/clear` automático precisa de tmux: o hook pede ao dono para digitar `/clear` |
+| Zelador | só no modo `agente` (em segundo plano no gerente), e com pouco a fazer: as automações não rodam |
+| Vigia do gerente (`vigia-gerente.py`) | funciona para queda de sessão (pelos arquivos de `~/.claude/sessions`) |
+| Automações (saúde, processos parados, consumo) e serviços | ficam de fora: dependem do systemd e do `/proc` |
+| Controle térmico e ventoinhas | ficam de fora: o Windows não expõe `/sys`; use o WSL2 com `KIT_TERM_WINDOWS=1` |
+| Lançadores em tmux (`gerente-laco`, `sessao-projeto`, `abrir-zelador`) | ficam de fora: abra as sessões à mão (`claude --name NOME --permission-mode auto`) |
+
+Os caminhos do Git Bash (`/c/Users/...`) são convertidos para os do Windows (`C:\Users\...`) onde o Claude Code os
+compara (pasta das transcrições). Em `KIT_PROJETOS`, use o formato do Git Bash.

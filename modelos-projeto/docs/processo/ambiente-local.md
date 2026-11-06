@@ -36,7 +36,7 @@ Nunca toque na pilha de outra vaga nem na instalação do dono.
 <Comandos que devem passar numa máquina nova.>
 
 ## 6. CI local (se houver)
-<Executores, quantos, o que a térmica faz. O gerente da máquina cuida do calor; o orquestrador não mexe.>
+<Executores, quantos, rótulos (com GPU: `gpu`, `gpu-<tipo>`; sem GPU, nenhum rótulo de GPU), o que a térmica faz. O gerente da máquina cuida do calor; o orquestrador não mexe.>
 
 ## 7. Relógio
 O NTP fica ligado; testes com tempo usam relógio injetável, um só por teste.

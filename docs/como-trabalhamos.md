@@ -22,10 +22,10 @@ Este kit organiza o desenvolvimento com o Claude Code em três camadas, cada uma
 - Não precisa vigiar a máquina: as automações avisam só quando o estado muda.
 
 ## 2. O gerente da máquina (skill `gerente-da-maquina`)
-Uma sessão do Claude Code aberta na pasta pessoal, sempre no ar (sobe no boot pelo serviço `gerente`). Ela:
+Uma sessão do Claude Code aberta na pasta pessoal, sempre no ar (sobe no boot pelo serviço `gerente`; no Windows nativo, aberta à mão). Ela:
 - **cuida do hardware e dos processos**: saúde (disco, memória, carga), controle térmico da CI local e processos parados;
 - **cuida do consumo da conta**: mede a janela de 5 h e a semana do plano, calcula quantos agentes capazes (opus/fable) podem rodar ao mesmo tempo e a quem cabe a vez (o *bastão*), e publica isso numa **orientação única**;
-- **gerencia o zelador**, um agente econômico (sonnet) que age nas escalações das automações;
+- **gerencia o zelador**, uma sessão econômica (sonnet) que age nas escalações das automações. A cadeia é: automações → logs de escalação → zelador → gerente. O gerente abre e reabre o zelador (`abrir-zelador`) e arma um vigia (`vigia-gerente`) que o acorda com o crítico ou quando uma sessão de projeto ou o zelador fica fora do ar há 5 min;
 - **mantém as sessões de produção**: abre, reinicia em modo auto e retoma depois de queda ou boot;
 - **registra toda mudança de sistema** com o comando para desfazer.
 

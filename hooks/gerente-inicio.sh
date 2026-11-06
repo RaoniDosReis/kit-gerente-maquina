@@ -13,15 +13,29 @@ G="${G_TESTE:-$HOME/.claude/skills/gerente-da-maquina}"
 [ -f "$G/SKILL.md" ] || G="$(dirname "$KIT_LIB")"
 parte="${1:-skill}"
 
+vivo_pid() { local p; p=$(cat "$1" 2>/dev/null) || return 1; [ -n "$p" ] && kill -0 "$p" 2>/dev/null; }
+
 checagem() {
-  echo "Checagem de abertura (rodada pelo hook agora):"
-  local s
-  for s in saude-auto parados-auto consumo-auto ci-termica controle-termico gerente; do  # só as unidades que existem
-    systemctl --user cat "$s" >/dev/null 2>&1 || continue
-    echo "- $s: $(systemctl --user is-active "$s" 2>&1)"
-  done
-  if pgrep -f 'scripts/esperar-zelador\.sh' >/dev/null; then echo "- zelador: armado"
-  else echo "- zelador: SEM ZELADOR. Relance pela §4 da skill zelador antes de qualquer outra coisa."; fi
+  local s plat; plat=$(kit_plataforma)
+  echo "Checagem de abertura (rodada pelo hook agora; plataforma $plat):"
+  if kit_tem_systemd; then
+    for s in saude-auto parados-auto consumo-auto ci-termica controle-termico gerente; do  # só as unidades que existem
+      systemctl --user cat "$s" >/dev/null 2>&1 || continue
+      echo "- $s: $(systemctl --user is-active "$s" 2>&1)"
+    done
+  else
+    echo "- serviços: sem systemd do usuário aqui (automações e térmica ficam de fora)"
+  fi
+  # pelo PID que o esperar-zelador.sh grava; sem o arquivo (vigia antigo), pelo pgrep, onde houver
+  if vivo_pid "$KIT_CACHE/esperar-zelador.pid" || { [ ! -e "$KIT_CACHE/esperar-zelador.pid" ] && command -v pgrep >/dev/null \
+       && pgrep -f 'scripts/esperar-zelador\.sh' >/dev/null; }; then
+    echo "- zelador: armado"
+  else
+    echo "- zelador: SEM ZELADOR (modo $(kit_zelador_modo)). Antes de qualquer outra coisa: $( [ "$(kit_zelador_modo)" = sessao ] && echo "abrir-zelador" || echo "relance pela §4 da skill zelador (modo agente)")."
+  fi
+  if vivo_pid "$KIT_CACHE/vigia-gerente.pid"; then echo "- vigia do gerente: armado"
+  else echo "- vigia do gerente: DESARMADO. Arme (run_in_background, sem timeout): $KIT_PY ~/.claude/skills/monitor-de-uso/scripts/vigia-gerente.py"; fi
+  if [ "$plat" = windows ]; then echo "- sessões: o modo de cada uma não é conferido no Windows nativo (sem /proc)"; return; fi
   local f pid cmd nome modo
   for f in "$HOME"/.claude/sessions/*.json; do
     [ -f "$f" ] || continue
@@ -75,6 +89,16 @@ if [ "${1:-}" = --autoteste ]; then
     if [ "$o" != resume ]; then grep -qF -- "$(grep -v '^$' "$G/SKILL.md" | tail -1 | cut -c1-80)" <<<"$ctx" || { echo "FALHA $o: a skill não chegou inteira (última linha ausente)"; falhas=1; }; fi
     grep -q "SKILL NÃO CABE" <<<"$ctx" && { echo "FALHA $o: a SKILL.md passou de 9 mil caracteres e foi cortada; enxugue"; falhas=1; }
   done
+  # zelador e vigia armados (PIDs de processos do próprio teste) e, sem systemd, a linha de serviços
+  mkdir -p "$KIT_CACHE"; sleep 30 & sp=$!; echo "$sp" > "$KIT_CACHE/esperar-zelador.pid"; echo "$sp" > "$KIT_CACHE/vigia-gerente.pid"
+  ctx=$(printf '{"cwd":"%s","source":"resume"}' "$T/ga" | KIT_TEM_SYSTEMD=0 bash "$0" skill)
+  grep -q "zelador: armado" <<<"$ctx" && grep -q "vigia do gerente: armado" <<<"$ctx" && grep -q "sem systemd" <<<"$ctx" \
+    || { echo "FALHA: zelador/vigia armados ou linha sem systemd ($ctx)"; falhas=1; }
+  kill "$sp"; wait "$sp" 2>/dev/null
+  ctx=$(printf '{"cwd":"%s","source":"resume"}' "$T/ga" | KIT_ZELADOR_MODO=sessao bash "$0" skill)
+  grep -q "SEM ZELADOR.*abrir-zelador" <<<"$ctx" && grep -q "vigia do gerente: DESARMADO" <<<"$ctx" || { echo "FALHA: zelador/vigia desarmados ($ctx)"; falhas=1; }
+  ctx=$(printf '{"cwd":"%s","source":"resume"}' "$T/ga" | KIT_PLATAFORMA=windows KIT_TEM_SYSTEMD=0 KIT_ZELADOR_MODO=agente bash "$0" skill)
+  grep -q "plataforma windows" <<<"$ctx" && grep -q "modo agente" <<<"$ctx" && grep -q "não é conferido no Windows" <<<"$ctx" || { echo "FALHA: windows ($ctx)"; falhas=1; }
   out=$(printf '{"cwd":"%s","source":"startup"}' "$T/ga" | bash "$0" pendencias)
   grep -q "Pendências" <<<"$out" || { echo "FALHA: pendências"; falhas=1; }
   [ "${#out}" -lt 10000 ] || { echo "FALHA: pendências com ${#out} caracteres"; falhas=1; }

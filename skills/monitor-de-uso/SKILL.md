@@ -163,3 +163,7 @@ Para ter mais agentes em paralelo além da cota da assinatura, o orquestrador la
 - **Prova de vigia:** prazos por variável em segundos (`*_S`, com precedência sobre `*_MIN`) e a medida física fixada por variável; nunca o relógio nem o disco reais.
 - **Script em uso por vigia:** grave a versão nova num temporário da mesma pasta e `mv -f` por cima (o bash lê o script aos poucos); nunca reescreva no lugar.
 - **Renovação da semana:** a hora informada pela conta oscila segundos entre consultas; arredonde e aceite diferença menor que 1 h.
+
+## Vigias do zelador e do gerente
+- `scripts/esperar-zelador.sh` (do zelador): termina com linhas novas dos `*-escalados.log` ou serviço parado/travado; grava o PID em `$KIT_CACHE/esperar-zelador.pid` enquanto roda. Sem `systemctl`, só os logs. `--autoteste`.
+- `scripts/vigia-gerente.py` (do gerente): crítico, automação parada há 10 min e QUEDA (sessão de projeto ou zelador fora há `KIT_VIGIA_FORA_S`). Contagem própria dos logs; um vigia só. `--uma`, `--autoteste`. Detalhe: §4 da skill `zelador`.

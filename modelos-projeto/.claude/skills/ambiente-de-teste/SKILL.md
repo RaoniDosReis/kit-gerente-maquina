@@ -11,6 +11,11 @@ Modelo: preencha os comandos reais do projeto em `CLAUDE.md`, "Comandos" (subir,
 - O motor de contêineres ativo na sessão. Se não estiver, o ambiente sobe na CI ou num executor próprio.
 - A branch do PR com a CI verde e o revisor sem bloqueante.
 
+## Máquinas com e sem GPU
+- O tipo de GPU da máquina vem do gerente (`kit_gpu`: nvidia, amd, intel ou nenhuma). Não presuma GPU.
+- Testes que precisam de GPU ficam marcados (ex.: marcador `gpu` no pytest) e se pulam sozinhos quando não há placa nem driver (`nvidia-smi`, `rocm-smi`, ou a biblioteca do projeto dizendo que não há dispositivo). Pular não é falhar: o relatório diz "pulado: sem GPU".
+- Na CI, job de GPU pede o rótulo (`runs-on: [self-hosted, gpu]` ou `gpu-nvidia`/`gpu-amd`). Executor de máquina sem GPU não leva esse rótulo (`KIT_CI_ROTULOS` do gerente), então o job espera um executor com GPU ou fica de fora do portão, por decisão do orquestrador. Os jobs comuns não pedem rótulo de GPU.
+
 ## Subir
 1. Num worktree próprio da branch do PR.
 2. Na vaga do briefing (nome de projeto, portas e sub-rede únicos por vaga; nunca a instalação do dono nem a vaga reservada ao portão), com o comando de subida do projeto e espera pela saúde de todos os serviços.

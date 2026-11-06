@@ -19,7 +19,7 @@ estado normal** quando a CI acaba.
 | Peça | O que faz |
 |---|---|
 | `scripts/ci-termica.sh` (serviço `ci-termica`) | Detecta a CI, aplica o perfil, ajusta o teto pela temperatura, mantém as ventoinhas, repõe na saída. |
-| `scripts/temperatura.sh` | Imprime `cpu_pacote cpu_max_nucleo mhz_medio gpu` pelo kernel (coretemp, k10temp ou x86_pkg_temp; nvidia-smi se houver). `-` onde não há leitura. |
+| `scripts/temperatura.sh` | Imprime `cpu_pacote cpu_max_nucleo mhz_medio gpu` pelo kernel (coretemp, k10temp ou x86_pkg_temp) e a GPU pelo tipo detectado (ver GPU). `-` onde não há leitura. `--autoteste` com /sys falso. |
 | `scripts/termica-tendencia.py` (timers `termica-coletar`, `termica-relatorio`) | Registra cada sessão da CI em CSV e gera o relatório de tendência. |
 | `monitor-de-uso/scripts/saude-auto.py` | Garante que o `ci-termica` está de pé e que as ventoinhas ficam no máximo durante a CI (ver o zelador). |
 
@@ -61,6 +61,15 @@ Comandos: `ci-termica.sh --estado` (só lê), `--autoteste` (sysfs falso, não t
    ```
    O `powerprofilesctl` funciona pelo polkit com a sessão gráfica ativa; sem login depois do boot, o serviço avisa e segue com o resto.
 5. Teste com `--autoteste`, ligue o serviço (`systemctl --user enable --now ci-termica`) e acompanhe uma CI real pelo log. Ajuste os limiares no `kit.conf`, não no script.
+
+## GPU (com ou sem)
+O tipo vem de `kit_gpu` (`lib/plataforma.sh`): `nvidia` (nvidia-smi, ou placa 0x10de em `/sys/class/drm`), `amd` (rocm-smi ou 0x1002), `intel` (0x8086) ou `nenhuma`. `KIT_GPU` no `kit.conf` força.
+- **Temperatura da GPU** (`temperatura.sh`): nvidia pelo `nvidia-smi`; amd pelo hwmon `amdgpu` (temp1) ou `rocm-smi`; intel pelo hwmon `i915`/`xe`, se houver; nenhuma: `-`. A coluna `gpu_C` do `saude.log` e a tendência só usam a GPU quando há leitura.
+- **`TEMPERATURA CRÍTICA`** (`saude-auto`): a CPU quente com a GPU abaixo de 30 W indica calor só da CI. Sem GPU dedicada (nenhuma ou intel), a potência conta como 0 e a escalação vale; amd lê `power1_average` do hwmon; GPU que existe sem leitura não escala (não dá para separar o calor).
+- **Rótulos da CI:** `kit_rotulos_ci` sugere `self-hosted,<SO>,<arq>` e, só com nvidia ou amd, `gpu,gpu-<tipo>` (`KIT_CI_ROTULOS` força). Sem GPU, o executor não leva rótulo de GPU e os jobs de GPU ficam para outro executor (ver `modelos-projeto/.claude/skills/ambiente-de-teste/SKILL.md`).
+
+## Windows nativo
+Fica de fora: sem `/sys`, `/proc` nem systemd não há leitura de temperatura nem teto da CPU. Para a térmica no Windows, use o WSL2 com `KIT_TERM_WINDOWS=1` (abaixo). O `instalar.sh` não instala o `ci-termica` nem os timers `termica-*` quando `kit_termica` diz que não dá, e mostra o motivo.
 
 ## Relatórios de tendência (opcional)
 `termica-coletar.timer` (diário) acrescenta uma linha por sessão da CI em `tendencia-sessoes.csv` (perfil e teto inicial/final, teto médio ponderado pelo tempo, reduções, subidas, degraus de perfil, temperatura média/p95/máxima, frequência da CPU, carga) e, com `KIT_CI_REPO` e o `gh` autenticado, uma linha por job em `tendencia-jobs.csv`. `termica-relatorio.timer` (desligado; edite a data para umas 4 semanas depois do início) roda `--coletar --relatorio`, grava `relatorios/termica-<data>.txt` e escala `RELATÓRIO TÉRMICO` ao zelador, que avisa o gerente. Alerta quando o teto médio cai 3 pontos por semana ou a temperatura média sobe 1,5 °C por semana, ou um job fica 5% mais lento por semana. Sugestão padrão: limpar as saídas de ar e, se persistir, trocar a pasta térmica.

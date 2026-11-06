@@ -7,6 +7,12 @@ KIT_GERENTE=Gerente            # nome da sessão no Remote Control e nas mensage
 KIT_GERENTE_TMUX=gerente       # sessão tmux onde o gerente roda
 KIT_GERENTE_DIR=$HOME          # pasta onde o gerente é aberto (a pasta pessoal)
 
+# Zelador: a sessão econômica que age nas escalações das automações (skill zelador).
+KIT_ZELADOR=zelador            # nome da sessão (tmux, Remote Control e destino das mensagens)
+KIT_ZELADOR_MODELO=sonnet      # modelo econômico do zelador
+KIT_ZELADOR_MODO=auto          # sessao (tmux próprio), agente (em segundo plano no gerente) ou auto (sessao se houver tmux)
+KIT_VIGIA_FORA_S=300           # vigia-gerente: sessão de projeto ou zelador fora há tanto tempo avisa o gerente
+
 # Projetos com orquestrador: nome:pasta[:sessão-tmux], separados por espaço. O 1º tem prioridade no bastão.
 KIT_PROJETOS="APP:$HOME/projetos/app"
 
@@ -48,6 +54,11 @@ KIT_AGENTE_COMPACT=200000
 
 # Agentes extras pagos pela API (opcional): limite simultâneo. Chave e workspace ficam em ~/.config/anthropic-api/.
 KIT_API_LIMITE=2
+
+# Plataforma e GPU (detectadas; só mude para forçar). Veja: bash instalar.sh --verificar
+KIT_PY=                        # comando do Python 3.8+ (vazio = python3, python ou "py -3", o que rodar)
+KIT_GPU=auto                   # auto, nvidia, amd, intel ou nenhuma: leitura de temperatura da GPU e rótulo da CI
+KIT_CI_ROTULOS=                # rótulos do executor local da CI (vazio = self-hosted,<SO>,<arq>[,gpu,gpu-<tipo>])
 
 # Opcionais.
 KIT_TERM_WINDOWS=0             # WSL: limita a CPU pelo powercfg.exe do Windows durante a CI
